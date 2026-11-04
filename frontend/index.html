@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#004080"><meta name="description" content="Không gian giảng viên — Quản lý lịch phòng, thiết bị và nhật ký sử dụng Đại học Hải Phòng.">
+  <title>Không gian giảng viên · HPUNI</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23004080'/%3E%3Ctext x='15' y='46' font-size='42' fill='white'%3EH%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="account-menu.css">
+</head>
+<body>
+  <a class="skip" href="#main">Bỏ qua điều hướng</a>
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="#/overview"><span class="brand-mark">H<span>U</span></span><span>HPUNI<span class="brand-sub">ĐẠI HỌC HẢI PHÒNG</span></span></a>
+    <div class="workspace"><span class="workspace-icon" data-icon="graduation"></span><div>Không gian giảng viên<small>Quản trị nguồn lực</small></div><span class="tiny-dot"></span></div>
+    <p class="nav-caption">KHÔNG GIAN LÀM VIỆC</p>
+    <nav id="nav" aria-label="Điều hướng chính"></nav>
+    <div class="side-bottom"><div class="help-card"><span data-icon="help"></span><strong>Cần hỗ trợ?</strong><p>Xem hướng dẫn đăng ký và<br>sử dụng nguồn lực.</p><button class="help-link" data-action="help">Xem hướng dẫn <span>↗</span></button></div><div class="side-version"><span class="tiny-dot"></span> HPUNI · Cổng quản trị nguồn lực<span>v1.0</span></div></div>
+  </aside>
+  <div class="main-shell">
+    <header class="topbar"><div class="breadcrumb"><button class="icon-btn mobile-menu" data-action="menu" aria-label="Mở menu"><span data-icon="menu"></span></button><span class="desktop-label">Cổng quản trị nguồn lực</span><span class="crumb-sep">/</span><strong id="breadcrumb">Tổng quan</strong></div><div class="top-actions"><span class="semester">Học kỳ I · 2026–2027</span><button class="icon-btn notification-btn" data-action="notifications" aria-label="Thông báo"><span data-icon="bell"></span><i></i></button><span class="top-divider"></span><button class="profile" data-action="profile"><span class="avatar">MA</span><span><strong>Nguyễn Minh Anh</strong><small>Giảng viên · Khoa CNTT</small></span><span data-icon="chevron"></span></button></div></header>
+    <main id="main" tabindex="-1"></main>
+    <footer><span>© 2026 Đại học Hải Phòng <span class="footer-sep">·</span> Không gian giảng viên</span><span class="demo-label"><span class="tiny-dot"></span>Dữ liệu minh họa · Lưu trên trình duyệt</span></footer>
+  </div>
+  <dialog id="dialog" aria-labelledby="dialog-title"><div class="dialog-head"><div><span class="eyebrow">KHÔNG GIAN GIẢNG VIÊN</span><h2 id="dialog-title"></h2></div><button class="icon-btn" data-action="close" aria-label="Đóng hộp thoại"><span data-icon="close"></span></button></div><div id="dialog-body"></div></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="app.js"></script>
+  <script type="module" src="account-menu.js"></script>
+</body>
+</html>
+
+

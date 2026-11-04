@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {adminSeed,adminAction as act,accessCheck as check,validAdmin} from './admin-data.mjs';
+let d=adminSeed(),count=0;const ok=f=>{f();count++;};
+const p={id:'lecturer',userId:'USR-002',scope:'self',permissions:['rooms.book','reports.read']};
+const query={userId:'USR-002',ownerId:'USR-002',unit:'Khoa CNTT',permission:'reports.read'};
+const original=structuredClone(d);d=act(d,'role-account',p);
+ok(()=>assert.deepEqual(d.roles,original.roles));ok(()=>assert.deepEqual(d.users[5],original.users[5]));ok(()=>assert.equal(original.users[1].roleOverrides,undefined));
+ok(()=>assert(check(d,query).allowed));ok(()=>assert(!check(d,{...query,permission:'devices.borrow'}).allowed));ok(()=>assert(!check(d,{...query,ownerId:'USR-003'}).allowed));ok(()=>assert(validAdmin(d)));
+let active=act(d,'status',{id:'USR-006',status:'active'});ok(()=>assert(!check(active,{...query,userId:'USR-006',ownerId:'USR-006'}).allowed));
+ok(()=>assert.equal(d.audit.at(-1).after.roleOverrides.lecturer.permissions[1],'reports.read'));
+d=act(d,'scope',{id:'USR-002',scope:'self',units:[],denied:['reports.read']});ok(()=>assert(!check(d,query).allowed));
+d=act(d,'role-account',{...p,inherit:true});ok(()=>assert.equal(d.users[1].roleOverrides.lecturer,undefined));ok(()=>assert(check(d,{...query,permission:'devices.borrow'}).allowed));
+ok(()=>assert.throws(()=>act(d,'role-account',{...p,userId:'USR-003'}),/thuộc vai trò/));ok(()=>assert.throws(()=>act(d,'role-account',{...p,permissions:['bad']}),/hợp lệ/));ok(()=>assert.throws(()=>act(d,'role-account',p,0),/thay đổi/));
+ok(()=>assert.throws(()=>act(d,'role-account',{id:'admin',userId:'USR-001',scope:'all',permissions:[]}),/thu hồi/));
+d=act(d,'role-account',p);d=act(d,'user',{...d.users[1],roleIds:['accounting']});ok(()=>assert.equal(d.users[1].roleOverrides.lecturer,undefined));ok(()=>assert(validAdmin(d)));
+console.log(`PASS ${count} kiểm tra phân quyền từng tài khoản`);

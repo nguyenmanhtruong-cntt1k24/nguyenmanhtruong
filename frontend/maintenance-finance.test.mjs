@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {createSeed,budgetRows} from './executive-data.mjs';
+import {normalizeResources,manageResources} from './resource-store.mjs';
+import {syncMaintenanceCosts} from './maintenance-finance.mjs';
+import {accountingAction} from './accounting-data.mjs';
+let resources=normalizeResources();resources.maintenance=[{id:'BT-QA',asset:resources.assets[0].id,name:'Thiết bị QA',status:'running',cost:3500000,costRecordedAt:'2026-11-03T07:00:00Z'}];
+const initial=createSeed(),before=budgetRows(initial,2026,'Phòng Quản trị')[0].spent;
+let {db,changed}=syncMaintenanceCosts(initial,resources);assert.equal(changed,true);assert.equal(initial.paymentQueue,undefined);assert.equal(db.paymentQueue.length,1);assert.equal(db.paymentQueue[0].value,3500000);assert.equal(budgetRows(db,2026,'Phòng Quản trị')[0].spent,before);
+assert.equal(syncMaintenanceCosts(db,resources).changed,false);
+const q=db.paymentQueue[0];db=accountingAction(db,'expense',{...q,id:q.id});assert.equal(db.paymentQueue[0].status,'paid');assert.equal(budgetRows(db,2026,'Phòng Quản trị')[0].spent,before+3500000);assert.equal(syncMaintenanceCosts(db,resources).db.paymentQueue.length,1);
+assert.throws(()=>accountingAction(db,'expense',{...q,id:q.id}),/đã|tồn tại/);
+assert.throws(()=>manageResources(resources,'maintenance-cost',{id:'BT-QA',cost:1},resources.resourceRevision),/không thể thay đổi/);
+console.log('PASS đồng bộ bảo trì: chờ chi, không trùng, trừ đúng một lần, khóa số tiền đã gửi');

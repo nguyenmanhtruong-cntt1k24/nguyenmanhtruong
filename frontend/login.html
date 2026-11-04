@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#004080"><title>Đăng nhập · HPUNI</title>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <main class="login-shell">
+    <section class="intro" aria-label="Đại học Hải Phòng">
+      <a class="brand" href="login.html"><span class="brand-mark">HU</span><span>HPUNI<small>ĐẠI HỌC HẢI PHÒNG</small></span></a>
+      <div class="intro-copy"><span class="eyebrow">CỔNG QUẢN TRỊ NGUỒN LỰC</span><h1>Kết nối nguồn lực.<br>Đồng hành phát triển.</h1><p>Không gian làm việc tập trung dành cho cán bộ, giảng viên và các đơn vị trong trường.</p>
+      <div class="features"><span>01 <strong>Quản lý phòng & tài sản</strong></span><span>02 <strong>Tài chính & ngân sách</strong></span><span>03 <strong>Điều hành & báo cáo</strong></span></div></div>
+      <small class="intro-footer">© 2026 Đại học Hải Phòng</small>
+    </section>
+    <section class="login-area">
+      <div class="form-card"><span class="form-badge">CHÀO MỪNG TRỞ LẠI</span><h2>Đăng nhập</h2><p class="subtitle">Sử dụng tài khoản được nhà trường cấp để tiếp tục.</p>
+        <form id="login-form">
+          <label for="username">Tên đăng nhập hoặc email</label>
+          <input id="username" name="username" autocomplete="username" placeholder="Nhập tên đăng nhập hoặc email" required maxlength="254" autofocus>
+          <label for="password">Mật khẩu</label>
+          <div class="password-wrap"><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu" required maxlength="128"><button id="toggle-password" type="button" aria-label="Hiện mật khẩu" aria-pressed="false">Hiện</button></div>
+          <div class="form-options"><span class="demo-tag">Phiên bản trải nghiệm</span><button class="text-button" type="button" id="help">Quên mật khẩu?</button></div>
+          <div id="message" role="alert" hidden></div>
+          <button class="submit" type="submit">Đăng nhập <span aria-hidden="true">→</span></button>
+        </form>
+        <div id="role-picker" hidden><label for="role">Chọn không gian làm việc</label><select id="role"></select><button id="continue" class="submit" type="button">Tiếp tục →</button></div>
+        <details class="demo-accounts"><summary>Tài khoản dùng thử</summary><p>Mật khẩu chung: <strong>Demo@123</strong></p><div id="demo-list"></div><small>Chọn một tài khoản để điền tên đăng nhập.</small></details>
+        <p class="demo-note">Đăng nhập mô phỏng trên trình duyệt. Chưa kết nối hệ thống xác thực của nhà trường.</p>
+      </div>
+      <small class="area-footer">HPUNI · Hệ thống quản trị tài chính, tài sản và nguồn lực</small>
+    </section>
+  </main>
+  <script type="module" src="login.js"></script>
+</body>
+</html>
