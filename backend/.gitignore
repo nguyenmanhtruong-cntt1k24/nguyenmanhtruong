@@ -1,0 +1,10 @@
+**/bin/
+**/obj/
+.vs/
+TestResults/
+data-protection/
+*.user
+*.local.json
+*.bak
+*.log
+artifacts/

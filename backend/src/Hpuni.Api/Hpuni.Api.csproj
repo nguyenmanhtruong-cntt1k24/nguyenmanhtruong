@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup><UserSecretsId>hpuni-backend-development</UserSecretsId></PropertyGroup>
+  <ItemGroup>
+    <Content Include="../../../frontend/*.html;../../../frontend/*.css;../../../frontend/*.js;../../../frontend/*.mjs" Exclude="../../../frontend/*.test.mjs;../../../frontend/*-demo.js"
+             Link="PublicPortal/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <ProjectReference Include="../Hpuni.Infrastructure/Hpuni.Infrastructure.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
