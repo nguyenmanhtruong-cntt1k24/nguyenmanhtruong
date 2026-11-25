@@ -103,11 +103,11 @@ if (args.Contains("--migrate") || args.Contains("--bootstrap") || args.Contains(
         else { department.Name = "Kế hoạch - Tài chính"; department.NormalizedName = department.Name.ToUpperInvariant(); }
         await db.SaveChangesAsync();
         var existingRole = await roles.FindByIdAsync("khtc");
-        if (existingRole != null) { AdminService.Check(await roles.SetRoleNameAsync(existingRole, "Kế hoạch - Tài chính")); }
+        if (existingRole != null) { AdminService.Check(await roles.SetRoleNameAsync(existingRole, "Cán bộ kế hoạch - tài chính")); }
         else
         {
             if (await db.Roles.AnyAsync(x => x.Id == "khtc")) throw new InvalidOperationException("ID khtc đã tồn tại với tên khác.");
-            AdminService.Check(await roles.CreateAsync(new() { Id = "khtc", Name = "Kế hoạch - Tài chính", Scope = Hpuni.Domain.Scopes.All, BuiltIn = true }));
+            AdminService.Check(await roles.CreateAsync(new() { Id = "khtc", Name = "Cán bộ kế hoạch - tài chính", Scope = Hpuni.Domain.Scopes.All, BuiltIn = true }));
             db.RolePermissions.AddRange(new[] { "budget.read", "budget.appraise", "reports.read" }.Select(p => new Hpuni.Domain.RolePermission { RoleId = "khtc", Permission = p }));
             await db.SaveChangesAsync();
         }

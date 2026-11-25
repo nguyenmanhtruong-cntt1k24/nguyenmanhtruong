@@ -26,7 +26,7 @@ public static class Bootstrap
         {
             ("admin", "Quản trị viên", Scopes.All, [.. Permissions.CoreAdmin, "departments.manage"]),
             ("executive", "Ban Giám hiệu", Scopes.All, ["budget.approve", "budget.read", "reports.read", "reports.export"]),
-            ("khtc", "Kế hoạch - Tài chính", Scopes.All, ["budget.appraise", "budget.read", "reports.read"]),
+            ("khtc", "Cán bộ kế hoạch - tài chính", Scopes.All, ["budget.appraise", "budget.read", "reports.read"]),
             ("accounting", "Cán bộ kế toán", Scopes.All, ["budget.write", "transactions.write", "budget.read", "reports.read", "reports.export"]),
             ("resources", "Quản lý phòng và tài sản", Scopes.All, ["resources.manage", "requests.review", "inventory.manage", "logs.review", "reports.read", "reports.export"]),
             ("lecturer", "Cán bộ / Giảng viên", Scopes.Self, ["rooms.book", "devices.borrow", "logs.write"])
