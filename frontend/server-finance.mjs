@@ -13,7 +13,7 @@ if(isKhtc&&!can('budget.appraise')){location.replace('login.html');throw Error('
 const labels={reviewing:'Chờ KHTC thẩm định',returned:'Trả bổ sung',draft:'Nháp',pending:'Chờ duyệt',approved:'Đã duyệt',rejected:'Từ chối',part_paid:'Thanh toán một phần',paid:'Đã chi'};
 const statusBadge=status=>`<span class="badge ${esc(status)}">${esc(labels[status]||status)}</span>`;
 const allMenus=[['overview','Tổng quan tài chính'],['estimates','Dự toán'],['controls','Điều chỉnh và khóa sổ'],['budgets','Ngân sách'],['queue','Hàng chờ thanh toán'],['transactions','Sổ thu – chi'],['reports','Báo cáo và xuất tệp'],...(can('budget.approve')?[['lifecycle','Nguyên giá và thanh lý']]:[])];
-const menus=isKhtc?[['overview','Phòng KHTC'],['estimates','Thẩm định dự toán'],['reports','Báo cáo tài chính']]:allMenus;
+const menus=isKhtc?[['overview','Kế hoạch - Tài chính'],['estimates','Thẩm định dự toán'],['reports','Báo cáo tài chính']]:allMenus;
 let proposals=[],payments=[],entries=[],reversals=[],departments=[],balances=[],received=0,page=1,total=0,year=new Date().getFullYear(),unit='',category='',editing=null,loadRevision=0;
 const dep=id=>departments.find(d=>d.id===id)?.name||id;
 const options=(rows,value)=>rows.map(([id,name])=>`<option value="${esc(id)}" ${id===String(value)?'selected':''}>${esc(name)}</option>`).join('');

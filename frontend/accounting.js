@@ -7,7 +7,7 @@ import {normalizeAccounting,accountingAction} from './accounting-data.mjs';
 document.querySelectorAll('[data-icon]').forEach(e=>{e.textContent=({menu:'☰',close:'×',bell:'♧',chevron:'⌄',building:'▦',shield:'◇'})[e.dataset.icon]||'↗';});
 const $=s=>document.querySelector(s),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),money=v=>Number(v).toLocaleString('vi-VN')+' ₫';
 const isKhtc=location.pathname.endsWith('/khtc.html');
-const allMenus=[['khtc','Phòng KHTC'],['overview','Tổng quan tài chính'],['estimates','Lập và theo dõi dự toán'],['appraisals','KHTC · Thẩm định'],['transactions','Sổ thu – chi'],['queue','Yêu cầu chi chờ xử lý'],['budgets','Theo dõi ngân sách'],['history','Lịch sử thao tác'],['reports','Báo cáo tài chính']];
+const allMenus=[['khtc','Kế hoạch - Tài chính'],['overview','Tổng quan tài chính'],['estimates','Lập và theo dõi dự toán'],['appraisals','KHTC · Thẩm định'],['transactions','Sổ thu – chi'],['queue','Yêu cầu chi chờ xử lý'],['budgets','Theo dõi ngân sách'],['history','Lịch sử thao tác'],['reports','Báo cáo tài chính']];
 const menus=allMenus.filter(([r])=>isKhtc?['khtc','appraisals','history'].includes(r):!['khtc','appraisals'].includes(r));
 const labels={draft:'Nháp',reviewing:'Chờ KHTC thẩm định',returned:'Yêu cầu điều chỉnh',pending:'Chờ người có thẩm quyền duyệt',approved:'Đã phê duyệt',rejected:'Bị từ chối',paid:'Đã chi'};
 let db,issue='',route='overview',revision,editing=null,year='2026',unit='',search='',timer;

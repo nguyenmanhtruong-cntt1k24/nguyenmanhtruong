@@ -97,13 +97,17 @@ if (args.Contains("--migrate") || args.Contains("--bootstrap") || args.Contains(
         var roles = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
         var accounting = await db.Departments.SingleOrDefaultAsync(d => d.Id == "accounting");
         if (accounting != null) { accounting.Name = "Kế toán"; accounting.NormalizedName = accounting.Name.ToUpperInvariant(); }
-        if (!await db.Departments.AnyAsync(d => d.Id == "khtc"))
-            db.Departments.Add(new() { Id = "khtc", Code = "KHTC", Name = "KHTC", NormalizedName = "KHTC" });
+        var department = await db.Departments.FindAsync("khtc");
+        if (department == null)
+            db.Departments.Add(new() { Id = "khtc", Code = "KHTC", Name = "Kế hoạch - Tài chính", NormalizedName = "KẾ HOẠCH - TÀI CHÍNH" });
+        else { department.Name = "Kế hoạch - Tài chính"; department.NormalizedName = department.Name.ToUpperInvariant(); }
         await db.SaveChangesAsync();
-        if (!await roles.RoleExistsAsync("Cán bộ thẩm định KHTC"))
+        var existingRole = await roles.FindByIdAsync("khtc");
+        if (existingRole != null) { AdminService.Check(await roles.SetRoleNameAsync(existingRole, "Kế hoạch - Tài chính")); }
+        else
         {
             if (await db.Roles.AnyAsync(x => x.Id == "khtc")) throw new InvalidOperationException("ID khtc đã tồn tại với tên khác.");
-            AdminService.Check(await roles.CreateAsync(new() { Id = "khtc", Name = "Cán bộ thẩm định KHTC", Scope = Hpuni.Domain.Scopes.All, BuiltIn = true }));
+            AdminService.Check(await roles.CreateAsync(new() { Id = "khtc", Name = "Kế hoạch - Tài chính", Scope = Hpuni.Domain.Scopes.All, BuiltIn = true }));
             db.RolePermissions.AddRange(new[] { "budget.read", "budget.appraise", "reports.read" }.Select(p => new Hpuni.Domain.RolePermission { RoleId = "khtc", Permission = p }));
             await db.SaveChangesAsync();
         }
