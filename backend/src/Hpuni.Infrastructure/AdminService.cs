@@ -47,15 +47,17 @@ public class AdminService(HpuniDbContext db, UserManager<ApplicationUser> users,
         if (!Regex.IsMatch(input.UserName ?? "", "^[a-zA-Z0-9][a-zA-Z0-9._-]{2,39}$"))
             throw AppException.Invalid("Tên đăng nhập cần 3–40 ký tự chữ không dấu, số, dấu chấm, gạch ngang hoặc gạch dưới.");
         await ValidateDepartment(input.DepartmentId, ct);
-        await ValidateRoles(input.RoleIds, ct);
+        var defaultRole = input.DepartmentId switch { "accounting" or "khtc" or "executive" => input.DepartmentId, "administration" => "resources", _ => "lecturer" };
+        var roleIds = input.RoleIds is { Length: > 0 } ? input.RoleIds : new[] { defaultRole };
+        await ValidateRoles(roleIds, ct);
         ValidatePassword(input.Password);
         ValidateDateOfBirth(input.DateOfBirth);
         var u = new ApplicationUser { UserName = input.UserName!.Trim(), Email = Required(input.Email, 256),
-            DisplayName = Required(input.DisplayName, 150), DepartmentId = input.DepartmentId, DateOfBirth = input.DateOfBirth };
+            DisplayName = Required(input.DisplayName, 150), DepartmentId = input.DepartmentId, Scope = Scopes.Unit, DateOfBirth = input.DateOfBirth };
         Check(await users.CreateAsync(u, input.Password));
-        foreach (var id in input.RoleIds.Distinct())
+        foreach (var id in roleIds.Distinct())
             db.UserRoles.Add(new() { UserId = u.Id, RoleId = id });
-        Audit(actor, "user.create", u.Id, new { u.UserName, u.Email, u.DisplayName, u.DepartmentId, input.RoleIds });
+        Audit(actor, "user.create", u.Id, new { u.UserName, u.Email, u.DisplayName, u.DepartmentId, roleIds });
         await db.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
         return await View(u, ct);

@@ -16,7 +16,7 @@ public static class Bootstrap
         var departments = new[]
         {
             ("administration", "QT", "Phòng Quản trị"), ("executive", "BGH", "Ban Giám hiệu"),
-            ("accounting", "KTTC", "Phòng Kế hoạch – Tài chính"), ("it", "CNTT", "Khoa CNTT"), ("economics", "KT", "Khoa Kinh tế")
+            ("accounting", "KTTC", "Kế toán"), ("khtc", "KHTC", "KHTC"), ("it", "CNTT", "Khoa CNTT"), ("economics", "KT", "Khoa Kinh tế")
         };
         foreach (var (id, code, name) in departments)
             if (!await db.Departments.AnyAsync(x => x.Id == id, ct))

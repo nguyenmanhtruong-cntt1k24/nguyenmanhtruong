@@ -95,6 +95,11 @@ if (args.Contains("--migrate") || args.Contains("--bootstrap") || args.Contains(
         await using var tx = await db.Database.BeginTransactionAsync();
         await TransactionLocks.Acquire(db, "identity", default);
         var roles = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+        var accounting = await db.Departments.SingleOrDefaultAsync(d => d.Id == "accounting");
+        if (accounting != null) { accounting.Name = "Kế toán"; accounting.NormalizedName = accounting.Name.ToUpperInvariant(); }
+        if (!await db.Departments.AnyAsync(d => d.Id == "khtc"))
+            db.Departments.Add(new() { Id = "khtc", Code = "KHTC", Name = "KHTC", NormalizedName = "KHTC" });
+        await db.SaveChangesAsync();
         if (!await roles.RoleExistsAsync("Cán bộ thẩm định KHTC"))
         {
             if (await db.Roles.AnyAsync(x => x.Id == "khtc")) throw new InvalidOperationException("ID khtc đã tồn tại với tên khác.");
