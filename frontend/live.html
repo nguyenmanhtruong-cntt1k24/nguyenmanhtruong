@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="vi">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>HPUNI · Đặt phòng</title><link rel="stylesheet" href="live.css"></head>
+<body><header><a href="live.html" class="brand">HPUNI <small>Quản lý phòng</small></a><span id="identity"></span><button id="logout" hidden>Đăng xuất</button></header>
+<main><p id="message" role="alert" hidden></p><section id="login" class="panel narrow" hidden><h1>Đăng nhập</h1><p>Sử dụng tài khoản được quản trị viên cấp.</p><form id="login-form"><label>Tên đăng nhập<input name="username" autocomplete="username" required maxlength="254"></label><label>Mật khẩu<input name="password" type="password" autocomplete="current-password" required maxlength="128"></label><button>Đăng nhập</button></form></section>
+<section id="workspace" hidden><nav id="navigation" aria-label="Chức năng"></nav><div id="content"></div></section></main>
+<script type="module" src="live.mjs"></script></body></html>

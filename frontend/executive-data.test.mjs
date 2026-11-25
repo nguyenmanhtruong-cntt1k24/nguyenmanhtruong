@@ -12,7 +12,7 @@ assert.equal(sum(seed),7800000000);
 assert.equal(approved.requests.find(r=>r.id===request.id).version,2);
 assert.throws(()=>decide(approved,{id:request.id,version:1,status:'approved',opinion:'Duyệt lại'}),/đã được xử lý/);
 assert.throws(()=>decide(seed,{id:request.id,version:0,status:'approved',opinion:'Sai phiên bản'}),/đã được xử lý/);
-assert.equal(decide(seed,{id:request.id,version:1,status:'rejected',opinion:'  '}).requests.find(r=>r.id===request.id).opinion,'');
+assert.throws(()=>decide(seed,{id:request.id,version:1,status:'rejected',opinion:'  '}),/lý do/);
 const rejected=decide(seed,{id:request.id,version:1,status:'rejected',opinion:'Cần bổ sung hồ sơ.'});
 assert.equal(sum(rejected),7800000000);
 assert.equal(rejected.requests.find(r=>r.id===request.id).opinion,'Cần bổ sung hồ sơ.');

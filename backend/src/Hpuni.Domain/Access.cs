@@ -10,7 +10,7 @@ public static class Scopes
 public static class Permissions
 {
     public static readonly string[] CoreAdmin = ["users.manage", "roles.manage", "permissions.manage", "audit.read"];
-    public static readonly string[] All = [.. CoreAdmin, "departments.manage", "budget.write", "budget.approve",
+    public static readonly string[] All = [.. CoreAdmin, "departments.manage", "budget.write", "budget.appraise", "budget.approve",
         "transactions.write", "budget.read", "rooms.book", "devices.borrow", "resources.manage", "requests.review",
         "inventory.manage", "logs.write", "logs.review", "reports.read", "reports.export"];
 }

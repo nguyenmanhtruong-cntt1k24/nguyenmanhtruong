@@ -1,12 +1,12 @@
-export const ADMIN_KEY='hpuni-admin-v1', CURRENT_ADMIN='USR-001';
+﻿export const ADMIN_KEY='hpuni-admin-v1', CURRENT_ADMIN='USR-001';
 export const ADMIN_UNITS=['Ban Giám hiệu','Phòng Kế hoạch – Tài chính','Phòng Quản trị','Khoa CNTT','Khoa Kinh tế'];
 const defaultDepartments=()=>[{id:'FAC-CNTT',code:'CNTT',name:'Khoa CNTT',notes:''},{id:'FAC-KT',code:'KT',name:'Khoa Kinh tế',notes:''}];
-export const adminUnits=db=>[...ADMIN_UNITS.slice(0,3),...(db.departments||defaultDepartments()).map(k=>k.name)];
+export const adminUnits=db=>db.server?db.departments.map(k=>k.name):[...ADMIN_UNITS.slice(0,3),...(db.departments||defaultDepartments()).map(k=>k.name)];
 export function normalizeAdmin(source){const d=structuredClone(source);if(!Object.hasOwn(d,'departments')){d.departments=defaultDepartments();const r=d.roles?.find(r=>r.id==='admin');if(r&&!r.permissions.includes('departments.manage'))r.permissions.push('departments.manage');}return d;}
 export const PERMISSIONS=[
  ['users.manage','Hệ thống','Quản lý tài khoản'],['roles.manage','Hệ thống','Quản lý vai trò'],['permissions.manage','Hệ thống','Phân quyền và phạm vi'],['audit.read','Hệ thống','Xem nhật ký quản trị'],['departments.manage','Hệ thống','Quản lý khoa'],
- ['budget.write','Tài chính','Lập và gửi dự toán'],['budget.approve','Tài chính','Phê duyệt dự toán'],['transactions.write','Tài chính','Ghi nhận thu – chi'],['budget.read','Tài chính','Xem ngân sách'],
- ['rooms.book','Phòng và tài sản','Đăng ký phòng'],['devices.borrow','Phòng và tài sản','Mượn và trả thiết bị'],['resources.manage','Phòng và tài sản','Quản lý phòng, tài sản'],['requests.review','Phòng và tài sản','Duyệt đăng ký, bàn giao'],['inventory.manage','Phòng và tài sản','Kiểm kê và bảo trì'],['logs.write','Phòng và tài sản','Ghi nhật ký sử dụng'],['logs.review','Phòng và tài sản','Xác nhận nhật ký'],['reports.read','Báo cáo','Xem và xuất báo cáo']
+ ['budget.write','Tài chính','Lập và gửi dự toán'],['budget.appraise','Tài chính','Thẩm định và trình dự toán'],['budget.approve','Tài chính','Phê duyệt dự toán'],['transactions.write','Tài chính','Ghi nhận thu – chi'],['budget.read','Tài chính','Xem ngân sách'],
+ ['rooms.book','Phòng và tài sản','Đăng ký phòng'],['devices.borrow','Phòng và tài sản','Mượn và trả thiết bị'],['resources.manage','Phòng và tài sản','Quản lý phòng, tài sản'],['requests.review','Phòng và tài sản','Duyệt đăng ký, bàn giao'],['inventory.manage','Phòng và tài sản','Kiểm kê và bảo trì'],['logs.write','Phòng và tài sản','Ghi nhật ký sử dụng'],['logs.review','Phòng và tài sản','Xác nhận nhật ký'],['reports.read','Báo cáo','Xem báo cáo'],['reports.export','Báo cáo','Xuất báo cáo']
  ];
 export const SCOPES={all:'Toàn trường',unit:'Đơn vị công tác',units:'Các đơn vị được chọn',self:'Dữ liệu của bản thân'};
 const core=['users.manage','roles.manage','permissions.manage','audit.read'];

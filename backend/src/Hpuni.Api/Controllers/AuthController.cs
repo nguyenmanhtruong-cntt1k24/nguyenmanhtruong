@@ -14,6 +14,8 @@ namespace Hpuni.Api.Controllers;
 
 public record LoginInput([Required, MaxLength(40)] string UserName, [Required, MaxLength(128)] string Password);
 public record PasswordInput([Required, MaxLength(128)] string CurrentPassword, [Required, MaxLength(128)] string NewPassword);
+public record ProfileInput([Required, MaxLength(150)] string DisplayName,
+    [Required, EmailAddress, MaxLength(256)] string Email, DateOnly? DateOfBirth, [Required] string Version, [MaxLength(25), RegularExpression(@"^\+?[0-9 ()\-]{7,25}$", ErrorMessage = "Số điện thoại không hợp lệ.")] string? PhoneNumber = null);
 
 [ApiController, Route("api/v1/auth"), Authorize]
 public class AuthController(HpuniDbContext db, UserManager<ApplicationUser> users, SignInManager<ApplicationUser> signIn,
@@ -60,6 +62,29 @@ public class AuthController(HpuniDbContext db, UserManager<ApplicationUser> user
     {
         Response.Headers.CacheControl = "no-store";
         var u = await db.Users.AsNoTracking().SingleAsync(x => x.Id == Actor, ct);
+        return Ok(await admin.View(u, ct));
+    }
+
+    [HttpPut("profile")]
+    public async Task<IActionResult> UpdateProfile(ProfileInput input, CancellationToken ct)
+    {
+        AdminService.ValidateDateOfBirth(input.DateOfBirth);
+        await using var tx = await db.Database.BeginTransactionAsync(ct);
+        await TransactionLocks.Acquire(db, "identity", ct);
+        var u = await db.Users.SingleAsync(x => x.Id == Actor, ct);
+        if (!u.Active) throw new AppException(401, "SESSION_EXPIRED", "Phiên đăng nhập hết hiệu lực.");
+        AdminService.Version(u.RowVersion, input.Version);
+        var before = new { u.DisplayName, u.Email, u.DateOfBirth, u.PhoneNumber };
+        var email = AdminService.Required(input.Email, 256);
+        if (!string.Equals(u.Email, email, StringComparison.OrdinalIgnoreCase)) u.EmailConfirmed = false;
+        u.DisplayName = AdminService.Required(input.DisplayName, 150);
+        u.Email = email;
+        u.DateOfBirth = input.DateOfBirth;
+        u.PhoneNumber = string.IsNullOrWhiteSpace(input.PhoneNumber) ? null : input.PhoneNumber.Trim();
+        AdminService.Check(await users.UpdateAsync(u));
+        admin.Audit(Actor, "auth.profile-update", Actor, new { before, after = new { u.DisplayName, u.Email, u.DateOfBirth, u.PhoneNumber } });
+        await db.SaveChangesAsync(ct);
+        await tx.CommitAsync(ct);
         return Ok(await admin.View(u, ct));
     }
 

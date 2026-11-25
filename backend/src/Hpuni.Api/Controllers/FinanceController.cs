@@ -19,15 +19,17 @@ public class FinanceController(HpuniDbContext db,FinanceService service,IAccessS
         Page(page,pageSize);var q=AssetOperationsService.Scoped(db.BudgetProposals.AsNoTracking(),await access.GetProfile(Actor,ct),"budget.read");
         if(year!=null)q=q.Where(x=>x.Year==year);if(!string.IsNullOrEmpty(departmentId)){await service.Demand(Actor,"budget.read",departmentId,ct);q=q.Where(x=>x.DepartmentId==departmentId);}if(!string.IsNullOrEmpty(category))q=q.Where(x=>x.Category==category);
         var total=await q.CountAsync(ct);var rows=await q.OrderByDescending(x=>x.CreatedAt).ThenBy(x=>x.Id).Skip((page-1)*pageSize).Take(pageSize).ToArrayAsync(ct);
-        return Ok(new{items=rows.Select(FinanceService.View),total,page,pageSize});
+        return Ok(new{items=await service.ProposalViews(rows,ct),total,page,pageSize});
     }
     [HttpGet("proposals/{id}")]
-    public async Task<IActionResult> Proposal(string id,CancellationToken ct)=>Ok(FinanceService.View(await service.GetProposal(Actor,id,"budget.read",ct)));
+    public async Task<IActionResult> Proposal(string id,CancellationToken ct)=>Ok((await service.ProposalViews([await service.GetProposal(Actor,id,"budget.read",ct)],ct))[0]);
+    [HttpPost("proposals/{id}/receive-funding")]
+    public async Task<IActionResult> ReceiveFunding(string id,ReceiveProposalFunding input,CancellationToken ct)=>Ok(await service.ReceiveFunding(Actor,id,Key,input,ct));
     [HttpPost("proposals")]
     public async Task<IActionResult> Create(SaveProposal input,CancellationToken ct)=>Ok(await service.Save(Actor,null,Key,input,ct));
     [HttpPut("proposals/{id}")]
     public async Task<IActionResult> Save(string id,SaveProposal input,CancellationToken ct)=>Ok(await service.Save(Actor,id,Key,input,ct));
-    [HttpPost("proposals/{id}/{operation:regex(^(submit|approve|reject)$)}")]
+    [HttpPost("proposals/{id}/{operation:regex(^(submit|appraise|return-review|approve|reject|return)$)}")]
     public async Task<IActionResult> Act(string id,string operation,ProposalCommand input,CancellationToken ct)=>Ok(await service.Action(Actor,id,operation,Key,input,ct));
     [HttpGet("balance")]
     public async Task<IActionResult> Balance([FromQuery]string departmentId,[FromQuery]int year,[FromQuery]string category="general",CancellationToken ct=default)=>Ok(await service.Balance(Actor,departmentId,year,category,ct));

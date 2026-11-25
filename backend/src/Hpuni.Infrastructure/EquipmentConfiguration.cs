@@ -15,7 +15,7 @@ public class AssetGroupConfiguration : IEntityTypeConfiguration<AssetGroup>
         e.Property(x => x.RowVersion).IsRowVersion();
         e.HasIndex(x => x.Code).IsUnique();
         e.HasOne<Department>().WithMany().HasForeignKey(x => x.DepartmentId).OnDelete(DeleteBehavior.Restrict);
-        e.ToTable(t => t.HasCheckConstraint("CK_Asset_Quantity", "[Total] BETWEEN 0 AND 1000000 AND [Damaged] BETWEEN 0 AND 1000000 AND [Lost] BETWEEN 0 AND 1000000 AND [Damaged] + [Lost] <= [Total]"));
+        e.ToTable(t => t.HasCheckConstraint("CK_Asset_Quantity", "[TongSo] BETWEEN 0 AND 1000000 AND [SoLuongHong] BETWEEN 0 AND 1000000 AND [SoLuongMat] BETWEEN 0 AND 1000000 AND [SoLuongHong] + [SoLuongMat] <= [TongSo]"));
     }
 }
 public class EquipmentLoanConfiguration : IEntityTypeConfiguration<EquipmentLoan>
@@ -32,9 +32,9 @@ public class EquipmentLoanConfiguration : IEntityTypeConfiguration<EquipmentLoan
         e.HasIndex(x => new { x.AssetGroupId, x.Status, x.Start, x.End });
         e.HasIndex(x => new { x.OwnerId, x.CreatedAt });
         e.ToTable(t => {
-            t.HasCheckConstraint("CK_Loan_Quantity", "[Quantity] BETWEEN 1 AND 1000000 AND [Returned] >= 0 AND [Returned] <= [Quantity] AND ([ReportedReceived] IS NULL OR [ReportedReceived] BETWEEN 0 AND [Quantity])");
-            t.HasCheckConstraint("CK_Loan_Interval", "[Start] < [End]");
-            t.HasCheckConstraint("CK_Loan_Status", "[Status] IN ('draft','pending','approved','rejected','cancelled','ready','receipt_disputed','borrowed','return_pending','completed') AND (([Status] IN ('ready','receipt_disputed','borrowed','return_pending','completed') AND [HandedAt] IS NOT NULL) OR ([Status] IN ('draft','pending','approved','rejected','cancelled') AND [HandedAt] IS NULL))");
+            t.HasCheckConstraint("CK_Loan_Quantity", "[SoLuong] BETWEEN 1 AND 1000000 AND [SoLuongDaTra] >= 0 AND [SoLuongDaTra] <= [SoLuong] AND ([SoLuongBaoDaNhan] IS NULL OR [SoLuongBaoDaNhan] BETWEEN 0 AND [SoLuong])");
+            t.HasCheckConstraint("CK_Loan_Interval", "[BatDau] < [KetThuc]");
+            t.HasCheckConstraint("CK_Loan_Status", "[TrangThai] IN ('draft','pending','approved','rejected','cancelled','ready','receipt_disputed','borrowed','return_pending','completed') AND (([TrangThai] IN ('ready','receipt_disputed','borrowed','return_pending','completed') AND [NgayBanGiao] IS NOT NULL) OR ([TrangThai] IN ('draft','pending','approved','rejected','cancelled') AND [NgayBanGiao] IS NULL))");
         });
     }
 }
@@ -46,8 +46,8 @@ public class EquipmentReturnConfiguration : IEntityTypeConfiguration<EquipmentRe
         e.Property(x => x.AcceptanceNote).HasMaxLength(2000);
         e.HasOne<EquipmentLoan>().WithMany().HasForeignKey(x => x.LoanId).OnDelete(DeleteBehavior.Restrict);
         e.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.AcceptedBy).OnDelete(DeleteBehavior.Restrict);
-        e.HasIndex(x => x.LoanId).IsUnique().HasFilter("[AcceptedAt] IS NULL");
-        e.ToTable(t => t.HasCheckConstraint("CK_Return_Quantity", "[Good] BETWEEN 0 AND 1000000 AND [Damaged] BETWEEN 0 AND 1000000 AND [Lost] BETWEEN 0 AND 1000000 AND [Good]+[Damaged]+[Lost] BETWEEN 1 AND 1000000 AND (([AcceptedAt] IS NULL AND [AcceptedGood] IS NULL AND [AcceptedDamaged] IS NULL AND [AcceptedLost] IS NULL AND [AcceptedBy] IS NULL) OR ([AcceptedAt] IS NOT NULL AND [AcceptedBy] IS NOT NULL AND [AcceptedGood] IS NOT NULL AND [AcceptedDamaged] IS NOT NULL AND [AcceptedLost] IS NOT NULL AND [AcceptedGood] BETWEEN 0 AND 1000000 AND [AcceptedDamaged] BETWEEN 0 AND 1000000 AND [AcceptedLost] BETWEEN 0 AND 1000000 AND [AcceptedGood]+[AcceptedDamaged]+[AcceptedLost] BETWEEN 1 AND [Good]+[Damaged]+[Lost]))"));
+        e.HasIndex(x => x.LoanId).IsUnique().HasFilter("[NgayNghiemThu] IS NULL");
+        e.ToTable(t => t.HasCheckConstraint("CK_Return_Quantity", "[SoLuongTot] BETWEEN 0 AND 1000000 AND [SoLuongHong] BETWEEN 0 AND 1000000 AND [SoLuongMat] BETWEEN 0 AND 1000000 AND [SoLuongTot]+[SoLuongHong]+[SoLuongMat] BETWEEN 1 AND 1000000 AND (([NgayNghiemThu] IS NULL AND [SoLuongTotNghiemThu] IS NULL AND [SoLuongHongNghiemThu] IS NULL AND [SoLuongMatNghiemThu] IS NULL AND [MaNguoiNghiemThu] IS NULL) OR ([NgayNghiemThu] IS NOT NULL AND [MaNguoiNghiemThu] IS NOT NULL AND [SoLuongTotNghiemThu] IS NOT NULL AND [SoLuongHongNghiemThu] IS NOT NULL AND [SoLuongMatNghiemThu] IS NOT NULL AND [SoLuongTotNghiemThu] BETWEEN 0 AND 1000000 AND [SoLuongHongNghiemThu] BETWEEN 0 AND 1000000 AND [SoLuongMatNghiemThu] BETWEEN 0 AND 1000000 AND [SoLuongTotNghiemThu]+[SoLuongHongNghiemThu]+[SoLuongMatNghiemThu] BETWEEN 1 AND [SoLuongTot]+[SoLuongHong]+[SoLuongMat]))"));
     }
 }
 public class EquipmentMovementConfiguration : IEntityTypeConfiguration<EquipmentMovement>
@@ -60,6 +60,6 @@ public class EquipmentMovementConfiguration : IEntityTypeConfiguration<Equipment
         e.HasOne<EquipmentLoan>().WithMany().HasForeignKey(x => x.LoanId).OnDelete(DeleteBehavior.Restrict);
         e.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.ActorId).OnDelete(DeleteBehavior.Restrict);
         e.HasIndex(x => new { x.AssetGroupId, x.At });
-        e.ToTable(t => t.HasCheckConstraint("CK_Movement_Quantity", "([Kind] IN ('disposal.good','disposal.damaged') AND [Quantity] BETWEEN -1000000 AND -1) OR ([Kind] NOT IN ('disposal.good','disposal.damaged') AND [Quantity] BETWEEN 1 AND 1000000)"));
+        e.ToTable(t => t.HasCheckConstraint("CK_Movement_Quantity", "([PhanLoai] IN ('disposal.good','disposal.damaged') AND [SoLuong] BETWEEN -1000000 AND -1) OR ([PhanLoai] NOT IN ('disposal.good','disposal.damaged') AND [SoLuong] BETWEEN 1 AND 1000000)"));
     }
 }

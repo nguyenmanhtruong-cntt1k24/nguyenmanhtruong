@@ -22,17 +22,22 @@ public class EquipmentService(HpuniDbContext db, IAccessService access, AdminSer
     private async Task<AssetGroup> Asset(string id, CancellationToken ct) =>
         await db.AssetGroups.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id, ct) ?? throw AppException.Missing();
 
-    public async Task<AssetGroupView[]> AssetViews(AssetGroup[] rows, CancellationToken ct)
+    public async Task<AssetGroupView[]> AssetViews(AssetGroup[] rows, CancellationToken ct, bool includeAcquisition = false)
     {
         var ids = rows.Select(x => x.Id).ToArray();
+        var profiles = includeAcquisition
+            ? await db.FixedAssetProfiles.AsNoTracking().Where(x => ids.Contains(x.AssetGroupId)).ToDictionaryAsync(x => x.AssetGroupId, ct)
+            : new Dictionary<string, FixedAssetProfile>();
         var holding = await db.EquipmentLoans.AsNoTracking().Where(x => ids.Contains(x.AssetGroupId) && Holding.Contains(x.Status)).ToArrayAsync(ct);
         var now = DateTimeOffset.UtcNow;
         var maintenance = await db.MaintenanceOrders.AsNoTracking().Where(x=>ids.Contains(x.AssetGroupId) && x.Mode=="service" && (x.Status=="running" || x.Status=="planned" && x.Start<=now && x.End>now)).ToArrayAsync(ct);
         return rows.Select(a => {
             var outstanding = holding.Where(x => x.AssetGroupId == a.Id).Sum(x => x.Quantity - x.Returned);
             var blocked = maintenance.Where(x=>x.AssetGroupId==a.Id).Sum(x=>x.Quantity);
+            var profile = profiles.GetValueOrDefault(a.Id);
             return new AssetGroupView(a.Id, a.Code, a.Name, a.Category, a.Unit, a.DepartmentId, a.Total, a.Damaged, a.Lost,
-                outstanding, Math.Max(0, a.Total - a.Damaged - a.Lost - outstanding - blocked), a.Active, Convert.ToBase64String(a.RowVersion), blocked);
+                outstanding, Math.Max(0, a.Total - a.Damaged - a.Lost - outstanding - blocked), a.Active, Convert.ToBase64String(a.RowVersion), blocked,
+                profile?.AcquisitionValue, profile?.AcquisitionDate, profile?.Source, profile?.Reference);
         }).ToArray();
     }
 
@@ -43,6 +48,9 @@ public class EquipmentService(HpuniDbContext db, IAccessService access, AdminSer
                 if (!await db.Departments.AnyAsync(x => x.Id == input.DepartmentId && x.Active, ct)) throw AppException.Invalid("Đơn vị không hợp lệ.");
                 var a = new AssetGroup { DepartmentId = input.DepartmentId };
                 Assign(a, input); db.AssetGroups.Add(a);
+                if (input.Quantity is < 0 or > 1000000) throw AppException.Invalid("Số lượng cần từ 0 đến 1.000.000.");
+                a.Total = input.Quantity ?? 0;
+                if (a.Total > 0) Movement(actor, a.Id, null, "stock.received", a.Total, "Số lượng ban đầu khi tạo hồ sơ tài sản");
                 admin.Audit(actor, "equipment.create", a.Id, new { a.Code, a.DepartmentId });
                 await db.SaveChangesAsync(ct);
                 return (await AssetViews([a], ct))[0];
@@ -61,7 +69,17 @@ public class EquipmentService(HpuniDbContext db, IAccessService access, AdminSer
         if (!input.Active && await db.EquipmentLoans.AnyAsync(x => x.AssetGroupId == id &&
             (Holding.Contains(x.Status) || (x.Status == "pending" || x.Status == "approved") && x.End > DateTimeOffset.UtcNow), ct))
             throw AppException.Invalid("Tài sản còn phiếu hiệu lực, chưa thể ngừng cho mượn.");
-        var before = new { a.Code, a.Name, a.Active };
+        var before = new { a.Code, a.Name, a.Active, a.Total };
+        if (input.Quantity != null && input.Quantity != a.Total)
+        {
+            if (input.Quantity is < 0 or > 1000000 || input.Quantity < a.Damaged + a.Lost)
+                throw AppException.Invalid("Số lượng cần từ 0 đến 1.000.000 và không nhỏ hơn số hỏng, mất.");
+            var priorTotal = a.Total;
+            a.Total = input.Quantity.Value;
+            if (a.Total < priorTotal && await Free(a, DateTimeOffset.UtcNow, DateTimeOffset.MaxValue, null, ct) < 0)
+                throw AppException.Invalid("Không thể giảm số lượng dưới nhu cầu của phiếu mượn hoặc kế hoạch bảo trì còn hiệu lực.");
+            Movement(actor, a.Id, null, a.Total > priorTotal ? "stock.adjusted.in" : "stock.adjusted.out", Math.Abs(a.Total - priorTotal), "Điều chỉnh số lượng trong hồ sơ tài sản");
+        }
         Assign(a, input);
         admin.Audit(actor, "equipment.update", id, new { before, after = input });
         await db.SaveChangesAsync(ct); await tx.CommitAsync(ct);

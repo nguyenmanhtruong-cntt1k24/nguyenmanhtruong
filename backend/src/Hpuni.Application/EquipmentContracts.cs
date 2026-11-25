@@ -1,10 +1,11 @@
 namespace Hpuni.Application;
 
 public record SaveAssetGroup(string Code, string Name, string Category, string Unit, string DepartmentId,
-    bool Active, string? Version);
+    bool Active, string? Version, int? Quantity = null);
 public record ReceiveStock(int Quantity, string Version, string? Note);
 public record AssetGroupView(string Id, string Code, string Name, string Category, string Unit,
-    string DepartmentId, int Total, int Damaged, int Lost, int Outstanding, int AvailableNow, bool Active, string Version, int MaintenanceBlockedNow = 0);
+    string DepartmentId, int Total, int Damaged, int Lost, int Outstanding, int AvailableNow, bool Active, string Version, int MaintenanceBlockedNow = 0,
+    decimal? AcquisitionValue = null, DateOnly? AcquisitionDate = null, string? AcquisitionSource = null, string? AcquisitionReference = null);
 public record SaveEquipmentLoan(string AssetGroupId, DateTimeOffset Start, DateTimeOffset End, int Quantity,
     string? Purpose, string? Version);
 public record EquipmentCommand(string Version, string? Note, int? Quantity = null);

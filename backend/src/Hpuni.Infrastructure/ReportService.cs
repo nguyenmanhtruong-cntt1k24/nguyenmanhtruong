@@ -39,7 +39,9 @@ public class ReportService(HpuniDbContext db,IAccessService access)
         var permission=export?"reports.export":"reports.read";var p=await Profile(actor,permission,department,ct);
         if(!AccessRules.HasPermission(p,"budget.read")||department!=null&&!AccessRules.Allows(p,"budget.read",department,null))throw AppException.Forbidden();
         return await Consistent(async()=>{
-            var aq=FinanceScope(db.BudgetAllocations,p,permission,department).Where(x=>x.Year==year);
+            var aq=from proposal in FinanceScope(db.BudgetProposals,p,permission,department).Where(x=>x.Year==year)
+                join allocation in db.BudgetAllocations on proposal.Id equals allocation.ProposalId
+                select new{proposal.DepartmentId,proposal.Category,allocation.Amount};
             var eq=FinanceScope(db.FinanceEntries,p,permission,department).Where(x=>x.Year==year&&!db.FinanceReversals.Any(r=>r.EntryId==x.Id));
             var jq=FinanceScope(db.BudgetAdjustments,p,permission,department).Where(x=>x.Year==year&&x.Status=="approved");
             if(category!=null){aq=aq.Where(x=>x.Category==category);eq=eq.Where(x=>x.Category==category);jq=jq.Where(x=>x.Category==category);}

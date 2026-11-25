@@ -51,7 +51,7 @@ public class ResourceWorkspaceController(HpuniDbContext db, IAccessService acces
         if(status=="active")q=q.Where(a=>a.Active);else if(status=="inactive")q=q.Where(a=>!a.Active);
         else if(status=="issue")q=q.Where(a=>a.Damaged+a.Lost>0);else if(status=="good")q=q.Where(a=>a.Damaged+a.Lost==0);
         var total=await q.CountAsync(ct);var rows=await q.OrderBy(a=>a.Code).ThenBy(a=>a.Id).Skip((page-1)*pageSize).Take(pageSize).ToArrayAsync(ct);
-        return Ok(new{items=await equipment.AssetViews(rows,ct),total,page,pageSize});
+        return Ok(new{items=await equipment.AssetViews(rows,ct,includeAcquisition:true),total,page,pageSize});
     }
     [HttpGet("requests")]
     public async Task<IActionResult> Requests([FromQuery]int page=1,[FromQuery]int pageSize=20,[FromQuery]string? search=null,
@@ -71,9 +71,11 @@ public class ResourceWorkspaceController(HpuniDbContext db, IAccessService acces
         var roomIds=selected.Where(r=>r.kind=="room").Select(r=>r.Id).ToArray();var loanIds=selected.Where(r=>r.kind=="device").Select(r=>r.Id).ToArray();
         var roomRows=await rooms.Where(r=>roomIds.Contains(r.Id)).ToArrayAsync(ct);var loanRows=await loans.Where(r=>loanIds.Contains(r.Id)).Include(r=>r.Asset).ToArrayAsync(ct);
         var resourceIds=roomRows.Select(r=>r.RoomId).ToArray();var names=await db.Rooms.Where(r=>resourceIds.Contains(r.Id)).ToDictionaryAsync(r=>r.Id,r=>r.Name,ct);
-        var items=new Dictionary<string,object>();foreach(var r in roomRows)items["room:"+r.Id]=new{kind="room",request=(object)RoomService.View(r),name=names.GetValueOrDefault(r.RoomId,r.RoomId)};
+        var ownerIds=roomRows.Select(r=>r.OwnerId).Concat(loanRows.Select(r=>r.OwnerId)).Distinct().ToArray();
+        var owners=await db.Users.AsNoTracking().Where(u=>ownerIds.Contains(u.Id)).ToDictionaryAsync(u=>u.Id,u=>u.DisplayName,ct);
+        var items=new Dictionary<string,object>();foreach(var r in roomRows)items["room:"+r.Id]=new{kind="room",request=(object)RoomService.View(r),name=names.GetValueOrDefault(r.RoomId,r.RoomId),ownerName=owners.GetValueOrDefault(r.OwnerId,r.OwnerId)};
         var loanViews=(await equipment.Views(loanRows,ct)).ToDictionary(v=>v.Id);
-        foreach(var r in loanRows)items["device:"+r.Id]=new{kind="device",request=(object)loanViews[r.Id],name=r.Asset.Name,manageDepartmentId=r.Asset.DepartmentId};
+        foreach(var r in loanRows)items["device:"+r.Id]=new{kind="device",request=(object)loanViews[r.Id],name=r.Asset.Name,manageDepartmentId=r.Asset.DepartmentId,ownerName=owners.GetValueOrDefault(r.OwnerId,r.OwnerId)};
         return Ok(new{items=selected.Select(r=>items[r.kind+":"+r.Id]),total,page,pageSize});
     }
     [HttpGet("logs")]
@@ -90,8 +92,10 @@ public class ResourceWorkspaceController(HpuniDbContext db, IAccessService acces
         var roomRows=await rooms.Where(r=>roomIds.Contains(r.Id)).ToDictionaryAsync(r=>r.Id,ct);var loanRows=await loans.Where(r=>loanIds.Contains(r.Id)).Include(r=>r.Asset).ToDictionaryAsync(r=>r.Id,ct);
         var roomLogs=await db.RoomUseLogs.AsNoTracking().Where(l=>roomIds.Contains(l.RequestId)).ToDictionaryAsync(l=>l.RequestId,ct);var loanLogs=await db.EquipmentUseLogs.AsNoTracking().Where(l=>loanIds.Contains(l.LoanId)).ToDictionaryAsync(l=>l.LoanId,ct);
         var loanViews=(await equipment.Views(loanRows.Values.ToArray(),ct)).ToDictionary(v=>v.Id);
-        var items=new List<object>();foreach(var r in selected){if(r.kind=="room")items.Add(new{r.kind,r.name,request=(object)RoomService.View(roomRows[r.requestId]),log=(object)RoomLogService.View(roomLogs[r.requestId])});
-            else {var loan=loanRows[r.requestId];var l=loanLogs[r.requestId];items.Add(new{r.kind,r.name,manageDepartmentId=loan.Asset.DepartmentId,request=(object)loanViews[loan.Id],log=(object)new EquipmentLogView(l.Id,l.LoanId,l.Used,l.ActualStart,l.ActualEnd,l.Quantity,l.Condition,l.Issue,l.Status,l.ReviewNote,Convert.ToBase64String(l.RowVersion))});}}
+        var ownerIds=roomRows.Values.Select(r=>r.OwnerId).Concat(loanRows.Values.Select(r=>r.OwnerId)).Distinct().ToArray();
+        var owners=await db.Users.AsNoTracking().Where(u=>ownerIds.Contains(u.Id)).ToDictionaryAsync(u=>u.Id,u=>u.DisplayName,ct);
+        var items=new List<object>();foreach(var r in selected){if(r.kind=="room")items.Add(new{r.kind,r.name,ownerName=owners.GetValueOrDefault(roomRows[r.requestId].OwnerId,roomRows[r.requestId].OwnerId),request=(object)RoomService.View(roomRows[r.requestId]),log=(object)RoomLogService.View(roomLogs[r.requestId])});
+            else {var loan=loanRows[r.requestId];var l=loanLogs[r.requestId];items.Add(new{r.kind,r.name,ownerName=owners.GetValueOrDefault(loan.OwnerId,loan.OwnerId),manageDepartmentId=loan.Asset.DepartmentId,request=(object)loanViews[loan.Id],log=(object)new EquipmentLogView(l.Id,l.LoanId,l.Used,l.ActualStart,l.ActualEnd,l.Quantity,l.Condition,l.Issue,l.Status,l.ReviewNote,Convert.ToBase64String(l.RowVersion))});}}
         return Ok(new{items,total,page,pageSize});
     }
     [HttpGet("inventories")]

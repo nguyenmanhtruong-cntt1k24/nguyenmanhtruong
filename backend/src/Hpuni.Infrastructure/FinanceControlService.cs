@@ -24,7 +24,7 @@ public class FinanceControlService(HpuniDbContext db, FinanceService finance, Ad
         return p==null?new(department,year,false,"",null,null):View(p);
     }
     public Task<FiscalPeriodView> ChangePeriod(string actor,string key,ChangeFiscalPeriod input,CancellationToken ct)=>commands.Run(actor,key,"fiscal.change",input,
-        ()=>finance.Demand(actor,"budget.approve",input.DepartmentId,ct),async()=>{
+        ()=>finance.Demand(actor,"transactions.write",input.DepartmentId,ct),async()=>{
             Year(input.Year);var dep=await Department(input.DepartmentId,ct);var reason=AdminService.Required(input.Reason,2000);
             await TransactionLocks.Acquire(db,PeriodKey(dep,input.Year),ct);
             var p=await db.FiscalPeriods.SingleOrDefaultAsync(x=>x.DepartmentId==dep&&x.Year==input.Year,ct);
@@ -55,10 +55,11 @@ public class FinanceControlService(HpuniDbContext db, FinanceService finance, Ad
             admin.Audit(actor,"budget.adjustment.review",id,input);await db.SaveChangesAsync(ct);return View(a);
         },ct);
     public Task<FinanceReversalView> Reverse(string actor,string id,string key,ReverseFinanceEntry input,CancellationToken ct)=>commands.Run(actor,key,"finance.reverse:"+id,input,
-        async()=>{var e=await db.FinanceEntries.AsNoTracking().SingleOrDefaultAsync(x=>x.Id==id,ct)??throw AppException.Missing();await finance.Demand(actor,"budget.approve",e.DepartmentId,ct);},async()=>{
+        async()=>{var e=await db.FinanceEntries.AsNoTracking().SingleOrDefaultAsync(x=>x.Id==id,ct)??throw AppException.Missing();await finance.Demand(actor,"transactions.write",e.DepartmentId,ct);},async()=>{
             var e=await db.FinanceEntries.AsNoTracking().SingleAsync(x=>x.Id==id,ct);
             // Same lock order as payment recording: source, year, budget, voucher registry.
             if(e.PaymentRequestId!=null)await TransactionLocks.Acquire(db,"payment:"+e.PaymentRequestId,ct);
+            if(e.FundingProposalId!=null)await TransactionLocks.Acquire(db,"proposal:"+e.FundingProposalId,ct);
             await Open(db,e.DepartmentId,e.Year,ct);
             await TransactionLocks.Acquire(db,$"budget:{e.DepartmentId}:{e.Year}:{e.Category}",ct);
             await TransactionLocks.Acquire(db,"finance-vouchers",ct);

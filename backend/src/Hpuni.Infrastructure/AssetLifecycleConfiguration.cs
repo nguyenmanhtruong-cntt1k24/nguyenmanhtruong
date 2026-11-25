@@ -13,7 +13,7 @@ public static class AssetLifecycleConfiguration
             e.Property(x => x.RowVersion).IsRowVersion();
             e.HasOne<AssetGroup>().WithOne().HasForeignKey<FixedAssetProfile>(x => x.AssetGroupId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.ActorId).OnDelete(DeleteBehavior.Restrict);
-            e.ToTable(t => t.HasCheckConstraint("CK_FixedAssetProfile_Value", "[AcquisitionValue] BETWEEN 1 AND 1000000000000 AND [AcquisitionDate] >= '1900-01-01'"));
+            e.ToTable(t => t.HasCheckConstraint("CK_FixedAssetProfile_Value", "[GiaTriMua] BETWEEN 1 AND 1000000000000 AND [NgayMua] >= '1900-01-01'"));
         });
         b.Entity<AssetDisposal>(e => {
             e.Property(x => x.Reason).HasMaxLength(2000); e.Property(x => x.Reference).HasMaxLength(150); e.Property(x => x.ReviewNote).HasMaxLength(2000);
@@ -24,8 +24,8 @@ public static class AssetLifecycleConfiguration
             e.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.ActorId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.ReviewerId).OnDelete(DeleteBehavior.Restrict);
             e.ToTable(t => {
-                t.HasCheckConstraint("CK_AssetDisposal_Quantity", "[Good] BETWEEN 0 AND 1000000 AND [Damaged] BETWEEN 0 AND 1000000 AND [Good]+[Damaged] BETWEEN 1 AND 1000000");
-                t.HasCheckConstraint("CK_AssetDisposal_Status", "([Status] = 'pending' AND [ReviewerId] IS NULL AND [ReviewedAt] IS NULL) OR ([Status] IN ('approved','rejected') AND [ReviewerId] IS NOT NULL AND [ReviewedAt] IS NOT NULL AND [ReviewerId] <> [ActorId])");
+                t.HasCheckConstraint("CK_AssetDisposal_Quantity", "[SoLuongTot] BETWEEN 0 AND 1000000 AND [SoLuongHong] BETWEEN 0 AND 1000000 AND [SoLuongTot]+[SoLuongHong] BETWEEN 1 AND 1000000");
+                t.HasCheckConstraint("CK_AssetDisposal_Status", "([TrangThai] = 'pending' AND [MaNguoiDuyet] IS NULL AND [NgayDuyet] IS NULL) OR ([TrangThai] IN ('approved','rejected') AND [MaNguoiDuyet] IS NOT NULL AND [NgayDuyet] IS NOT NULL AND [MaNguoiDuyet] <> [MaNguoiThucHien])");
             });
         });
     }

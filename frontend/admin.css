@@ -3,3 +3,11 @@
 @media(max-width:760px){.administration .hero-copy{width:100%}.administration .hero h2{font-size:23px}.administration .hero-actions{flex-wrap:wrap}.administration .admin-filters{padding:15px;gap:13px}.administration .admin-filters .field:first-child{grid-column:1/-1}.administration .admin-filters .field:last-child{grid-column:1/-1}.administration .role-cards{grid-template-columns:1fr}.administration .form-grid,.administration .permission-checks,.administration .snapshot-grid{grid-template-columns:1fr}.administration .simulator-panel #simulator-form{padding:0 18px 18px}.administration .simulation-result{padding:15px}.administration .detail-grid{grid-template-columns:1fr}.administration .form-actions{flex-wrap:wrap}.administration .hero-stamp{pointer-events:none}.administration .page-heading h1{font-size:23px}.administration .role-card{padding:20px}}
 
 #reset-password-dialog{width:min(480px,calc(100% - 32px));padding:25px;border:1px solid #d9e5f3;border-radius:12px;color:#153653}#reset-password-dialog::backdrop{background:#102b4a66}#reset-password-dialog h2{font-size:21px;margin-top:0}#reset-password-dialog p{font-size:12px;line-height:1.8}#reset-password-dialog label{display:block;margin:16px 0 8px;font-size:12px}#reset-password-dialog input[autocomplete]{width:100%;height:43px;padding:10px;border:1px solid #cbdced;border-radius:6px}#reset-error{color:#a32e37}
+
+.administration #admin-form[data-kind="user"] .form-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.administration .initial-password-field{grid-column:1/-1}
+.administration .initial-password-field small{color:var(--muted);font-size:10px;line-height:1.6}
+.administration #admin-form[data-kind="user"] .permission-group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
+.administration #admin-form[data-kind="user"] .checkbox-row{padding:8px;border-radius:6px}
+.administration #admin-form[data-kind="user"] .checkbox-row:hover{background:#f3f7fc}
+@media(max-width:760px){.administration #admin-form[data-kind="user"] .form-grid,.administration #admin-form[data-kind="user"] .permission-group{grid-template-columns:1fr}}

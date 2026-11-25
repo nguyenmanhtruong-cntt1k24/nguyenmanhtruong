@@ -4,7 +4,9 @@ public static class FrontendAssets
 {
     public static readonly HashSet<string> Paths = new(StringComparer.Ordinal)
     {
-        "/notifications.mjs", "/report-details.mjs", "/finance-controls.mjs", "/asset-lifecycle.mjs", "/reports.html", "/server-report-portal.mjs",
+        "/khtc.html", "/khtc-entry.mjs", "/khtc-hub.mjs", "/proposal-workflow.mjs",
+        "/page-help.mjs", "/page-help-data.mjs", "/page-help.css",
+        "/asset-combobox.mjs", "/notifications.mjs", "/report-details.mjs", "/finance-controls.mjs", "/asset-lifecycle.mjs", "/reports.html", "/server-report-portal.mjs",
         "/live.html", "/live.mjs", "/live.css", "/api-client.mjs", "/equipment-live.mjs",
         "/index.html", "/login.html", "/resources.html", "/admin.html", "/executive.html", "/accounting.html", "/payment-voucher.html",
         "/styles.css", "/login.css", "/resources.css", "/admin.css", "/executive.css", "/accounting.css", "/account-menu.css", "/payment-voucher.css",

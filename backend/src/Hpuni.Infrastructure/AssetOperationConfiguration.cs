@@ -15,12 +15,12 @@ public static class AssetOperationConfiguration
             e.HasOne<AssetGroup>().WithMany().HasForeignKey(x=>x.AssetGroupId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne<Department>().WithMany().HasForeignKey(x=>x.DepartmentId).OnDelete(DeleteBehavior.Restrict);
             e.HasIndex(x=>new{x.AssetGroupId,x.Status});
-            e.ToTable(t=>t.HasCheckConstraint("CK_Maintenance_Valid", "[Quantity] BETWEEN 1 AND 1000000 AND [Start] < [End] AND [Mode] IN ('service','repair') AND [Status] IN ('planned','running','completed','cancelled') AND [Cost] BETWEEN 0 AND 1000000000000 AND (([Status]='completed' AND [Result] IN ('good','unavailable')) OR ([Status]<>'completed' AND [Result]=''))"));
+            e.ToTable(t=>t.HasCheckConstraint("CK_Maintenance_Valid", "[SoLuong] BETWEEN 1 AND 1000000 AND [BatDau] < [KetThuc] AND [CheDo] IN ('service','repair') AND [TrangThai] IN ('planned','running','completed','cancelled') AND [ChiPhi] BETWEEN 0 AND 1000000000000 AND (([TrangThai]='completed' AND [KetQua] IN ('good','unavailable')) OR ([TrangThai]<>'completed' AND [KetQua]=''))"));
         });
         b.Entity<InventorySession>(e=>{
             e.Property(x=>x.RowVersion).IsRowVersion(); e.Property(x=>x.Name).HasMaxLength(150); e.Property(x=>x.Status).HasMaxLength(20);
             e.HasOne<Department>().WithMany().HasForeignKey(x=>x.DepartmentId).OnDelete(DeleteBehavior.Restrict);
-            e.ToTable(t=>t.HasCheckConstraint("CK_Inventory_Status","[Status] IN ('open','completed')"));
+            e.ToTable(t=>t.HasCheckConstraint("CK_Inventory_Status","[TrangThai] IN ('open','completed')"));
         });
         b.Entity<InventoryItem>(e=>{
             e.HasKey(x=>new{x.SessionId,x.AssetGroupId});
@@ -28,13 +28,13 @@ public static class AssetOperationConfiguration
             e.HasOne<AssetGroup>().WithMany().HasForeignKey(x=>x.AssetGroupId).OnDelete(DeleteBehavior.Restrict);
             e.Property(x=>x.Code).HasMaxLength(30); e.Property(x=>x.Name).HasMaxLength(150); e.Property(x=>x.AssetVersion).HasMaxLength(40);
             e.Property(x=>x.Condition).HasMaxLength(20); e.Property(x=>x.Note).HasMaxLength(2000);
-            e.ToTable(t=>t.HasCheckConstraint("CK_Inventory_Count","[Expected] BETWEEN 0 AND 1000000 AND [ExpectedDamaged]>=0 AND [ExpectedLost]>=0 AND [ExpectedDamaged]+[ExpectedLost]<=[Expected] AND ([Actual] IS NULL OR [Actual] BETWEEN 0 AND 1000000) AND [Condition] IN ('','good','damaged','missing')"));
+            e.ToTable(t=>t.HasCheckConstraint("CK_Inventory_Count","[SoLuongDuKien] BETWEEN 0 AND 1000000 AND [SoLuongHongDuKien]>=0 AND [SoLuongMatDuKien]>=0 AND [SoLuongHongDuKien]+[SoLuongMatDuKien]<=[SoLuongDuKien] AND ([SoLuongThucTe] IS NULL OR [SoLuongThucTe] BETWEEN 0 AND 1000000) AND [TinhTrang] IN ('','good','damaged','missing')"));
         });
         b.Entity<EquipmentUseLog>(e=>{
             e.Property(x=>x.RowVersion).IsRowVersion(); e.HasIndex(x=>x.LoanId).IsUnique();
             e.HasOne<EquipmentLoan>().WithMany().HasForeignKey(x=>x.LoanId).OnDelete(DeleteBehavior.Restrict);
             e.Property(x=>x.Condition).HasMaxLength(2000); e.Property(x=>x.Issue).HasMaxLength(2000); e.Property(x=>x.ReviewNote).HasMaxLength(2000); e.Property(x=>x.Status).HasMaxLength(20);
-            e.ToTable(t=>t.HasCheckConstraint("CK_EquipmentLog_Valid","[Status] IN ('submitted','needs_changes','confirmed') AND (([Used]=0 AND [ActualStart] IS NULL AND [ActualEnd] IS NULL AND [Quantity] IS NULL) OR ([Used]=1 AND [ActualStart] IS NOT NULL AND [ActualEnd] IS NOT NULL AND [Quantity] IS NOT NULL AND [ActualStart]<[ActualEnd] AND [Quantity] BETWEEN 1 AND 1000000))"));
+            e.ToTable(t=>t.HasCheckConstraint("CK_EquipmentLog_Valid","[TrangThai] IN ('submitted','needs_changes','confirmed') AND (([DaSuDung]=0 AND [BatDauThucTe] IS NULL AND [KetThucThucTe] IS NULL AND [SoLuong] IS NULL) OR ([DaSuDung]=1 AND [BatDauThucTe] IS NOT NULL AND [KetThucThucTe] IS NOT NULL AND [SoLuong] IS NOT NULL AND [BatDauThucTe]<[KetThucThucTe] AND [SoLuong] BETWEEN 1 AND 1000000))"));
         });
     }
 }

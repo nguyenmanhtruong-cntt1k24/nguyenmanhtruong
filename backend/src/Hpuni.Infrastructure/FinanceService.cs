@@ -19,7 +19,32 @@ public class FinanceService(HpuniDbContext db, IAccessService access, AdminServi
     static string BudgetKey(string dep,int year,string cat)=>$"budget:{dep}:{year}:{cat}";
     public static ProposalView View(BudgetProposal p)=>new(p.Id,p.DepartmentId,p.Year,p.Category,p.Title,p.Purpose,p.OwnerId,p.Status,p.Amount,JsonSerializer.Deserialize<ProposalLine[]>(p.LinesJson)!,p.ReviewNote,p.ReviewerId,Convert.ToBase64String(p.RowVersion));
     public static PaymentView View(PaymentRequest p)=>new(p.Id,p.DepartmentId,p.Year,p.Amount,p.Content,p.MaintenanceId,p.Status,Convert.ToBase64String(p.RowVersion));
-    public static FinanceEntryView View(FinanceEntry e)=>new(e.Id,e.DepartmentId,e.Year,e.Category,e.Kind,e.Amount,e.Voucher,e.Date,e.Content,e.PaymentRequestId);
+    public static FinanceEntryView View(FinanceEntry e)=>new(e.Id,e.DepartmentId,e.Year,e.Category,e.Kind,e.Amount,e.Voucher,e.Date,e.Content,e.PaymentRequestId,e.FundingProposalId);
+    public async Task<ProposalView[]> ProposalViews(BudgetProposal[] rows,CancellationToken ct)
+    {
+        var ids=rows.Select(p=>p.Id).ToArray();
+        var receipts=await db.FinanceEntries.AsNoTracking().Where(e=>ids.Contains(e.FundingProposalId!)&&!db.FinanceReversals.Any(r=>r.EntryId==e.Id)).ToDictionaryAsync(e=>e.FundingProposalId!,e=>e.Id,ct);
+        var events=await db.AuditEvents.AsNoTracking().Where(x=>ids.Contains(x.TargetId)&&(x.Action=="proposal.appraise"||x.Action=="proposal.save")).OrderByDescending(x=>x.Id).ToArrayAsync(ct);
+        return rows.Select(p=>{var a=events.FirstOrDefault(x=>x.TargetId==p.Id);if(a?.Action!="proposal.appraise")a=null;var note=a==null?null:JsonSerializer.Deserialize<ProposalCommand>(a.DetailJson)?.Note;return View(p) with{FundingReceiptId=receipts.GetValueOrDefault(p.Id),AppraisalNote=note,AppraiserId=a?.ActorId,AppraisedAt=a?.At};}).ToArray();
+    }
+    public Task<FinanceEntryView> ReceiveFunding(string actor,string id,string key,ReceiveProposalFunding input,CancellationToken ct)=>commands.Run(actor,key,"proposal.receive:"+id,input,
+        async()=>{await GetProposal(actor,id,"transactions.write",ct);},async()=>{
+            await TransactionLocks.Acquire(db,"proposal:"+id,ct);
+            var p=await db.BudgetProposals.SingleAsync(x=>x.Id==id,ct);
+            await Demand(actor,"transactions.write",p.DepartmentId,ct);AdminService.Version(p.RowVersion,input.Version);
+            if(p.Status!="approved")throw AppException.Invalid("Chỉ nhận kinh phí của dự toán đã được duyệt.");
+            if(input.Date.Year!=p.Year)throw AppException.Invalid("Ngày nhận tiền phải thuộc năm tài chính của dự toán.");
+            await FinanceControlService.Open(db,p.DepartmentId,p.Year,ct);
+            await TransactionLocks.Acquire(db,"finance-vouchers",ct);
+            if(await db.FinanceEntries.AnyAsync(e=>e.FundingProposalId==id&&!db.FinanceReversals.Any(r=>r.EntryId==e.Id),ct))
+                throw new AppException(409,"FUNDING_RECEIVED","Dự toán đã có phiếu thu nhận kinh phí.");
+            var voucher=AdminService.Required(input.Voucher,100);
+            if(await db.FinanceEntries.AnyAsync(e=>e.Year==p.Year&&e.Voucher==voucher,ct))throw new AppException(409,"VOUCHER_EXISTS","Số chứng từ đã được dùng trong năm tài chính.");
+            var content="Nhận kinh phí dự toán: "+p.Title;
+            var entry=new FinanceEntry{DepartmentId=p.DepartmentId,Year=p.Year,Category=p.Category,Kind="receipt",Amount=p.Amount,Voucher=voucher,Date=input.Date,Content=content[..Math.Min(2000,content.Length)],ActorId=actor,FundingProposalId=p.Id};
+            db.FinanceEntries.Add(entry);admin.Audit(actor,"proposal.receive",p.Id,new{entry.Id,entry.Amount,input.Voucher,input.Date});
+            await db.SaveChangesAsync(ct);return View(entry);
+        },ct);
     public async Task<BudgetProposal> GetProposal(string actor,string id,string permission,CancellationToken ct)
     {
         var p=await db.BudgetProposals.AsNoTracking().SingleOrDefaultAsync(x=>x.Id==id,ct)??throw AppException.Missing();
@@ -37,7 +62,7 @@ public class FinanceService(HpuniDbContext db, IAccessService access, AdminServi
             else{
                 await TransactionLocks.Acquire(db,"proposal:"+id,ct);p=await db.BudgetProposals.SingleAsync(x=>x.Id==id,ct);
                 await Demand(actor,"budget.write",p.DepartmentId,ct);AdminService.Version(p.RowVersion,input.Version??"");
-                if(p.Status is not("draft" or "rejected"))throw AppException.Invalid("Chỉ sửa dự toán nháp hoặc bị từ chối.");
+                if(p.Status is not("draft" or "returned"))throw AppException.Invalid("Chỉ sửa dự toán nháp hoặc trả bổ sung.");
             }
             var periods=new[]{(Department:department,Year:input.Year),(Department:id==null?department:p.DepartmentId,Year:id==null?input.Year:p.Year)};
             foreach(var period in periods.Distinct().OrderBy(x=>FinanceControlService.PeriodKey(x.Department,x.Year),StringComparer.Ordinal))
@@ -48,19 +73,25 @@ public class FinanceService(HpuniDbContext db, IAccessService access, AdminServi
         },ct);
     public Task<ProposalView> Action(string actor,string id,string operation,string key,ProposalCommand input,CancellationToken ct)
     {
-        var permission=operation=="submit"?"budget.write":"budget.approve";
+        var permission=operation=="submit"?"budget.write":operation is "appraise" or "return-review"?"budget.appraise":"budget.approve";
         return commands.Run(actor,key,"proposal."+operation+":"+id,input,async()=>{await GetProposal(actor,id,permission,ct);},async()=>{
             await TransactionLocks.Acquire(db,"proposal:"+id,ct);var p=await db.BudgetProposals.SingleAsync(x=>x.Id==id,ct);
             await Demand(actor,permission,p.DepartmentId,ct);AdminService.Version(p.RowVersion,input.Version);
             await FinanceControlService.Open(db,p.DepartmentId,p.Year,ct);
             if(operation=="submit"){
-                if(p.Status!="draft")throw AppException.Invalid("Chỉ gửi dự toán nháp.");p.Status="pending";
+                if(p.Status!="draft")throw AppException.Invalid("Chỉ gửi dự toán nháp.");p.Status="reviewing";
+            }else if(operation is "appraise" or "return-review"){
+                if(p.Status is not("reviewing" or "pending"))throw AppException.Invalid("Dự toán không còn chờ thẩm định.");
+                p.ReviewNote=AdminService.Required(input.Note??"",2000);p.ReviewerId=actor;
+                p.Status=operation=="appraise"?"pending":"returned";
             }else{
-                if(operation is not("approve" or "reject")||p.Status!="pending")throw AppException.Invalid("Dự toán không còn chờ duyệt.");
-                p.ReviewNote=AdminService.Required(input.Note??"",2000);p.ReviewerId=actor;p.Status=operation=="approve"?"approved":"rejected";
+                if(operation is not("approve" or "reject" or "return")||p.Status!="pending")throw AppException.Invalid("Dự toán không còn chờ duyệt.");
+                var last=await db.AuditEvents.AsNoTracking().Where(x=>x.TargetId==id&&x.Action.StartsWith("proposal.")).OrderByDescending(x=>x.Id).Select(x=>x.Action).FirstOrDefaultAsync(ct);
+                if(last!="proposal.appraise")throw AppException.Invalid("Dự toán cần được KHTC thẩm định và trình trước khi quyết định.");
+                p.ReviewNote=AdminService.Required(input.Note??"",2000);p.ReviewerId=actor;p.Status=operation=="approve"?"approved":operation=="return"?"returned":"rejected";
                 if(operation=="approve"){
                     await TransactionLocks.Acquire(db,BudgetKey(p.DepartmentId,p.Year,p.Category),ct);
-                    db.BudgetAllocations.Add(new(){ProposalId=p.Id,DepartmentId=p.DepartmentId,Year=p.Year,Category=p.Category,Amount=p.Amount});
+                    db.BudgetAllocations.Add(new(){ProposalId=p.Id,Amount=p.Amount});
                 }
             }
             admin.Audit(actor,"proposal."+operation,id,input);await db.SaveChangesAsync(ct);return View(p);
@@ -76,7 +107,10 @@ public class FinanceService(HpuniDbContext db, IAccessService access, AdminServi
     }
     public async Task<BudgetBalance> Calculate(string dep,int year,string cat,CancellationToken ct)
     {
-        var allocated=await db.BudgetAllocations.Where(x=>x.DepartmentId==dep&&x.Year==year&&x.Category==cat).SumAsync(x=>(decimal?)x.Amount,ct)??0;
+        var allocated=await (from a in db.BudgetAllocations
+            join p in db.BudgetProposals on a.ProposalId equals p.Id
+            where p.DepartmentId==dep&&p.Year==year&&p.Category==cat
+            select (decimal?)a.Amount).SumAsync(ct)??0;
         var spent=await db.FinanceEntries.Where(x=>x.DepartmentId==dep&&x.Year==year&&x.Category==cat&&x.Kind=="expense"&&!db.FinanceReversals.Any(r=>r.EntryId==x.Id)).SumAsync(x=>(decimal?)x.Amount,ct)??0;
         allocated+=await db.BudgetAdjustments.Where(x=>x.DepartmentId==dep&&x.Year==year&&x.Category==cat&&x.Status=="approved").SumAsync(x=>(decimal?)x.Amount,ct)??0;
         return new(dep,year,cat,allocated,spent,allocated-spent);
@@ -88,9 +122,10 @@ public class FinanceService(HpuniDbContext db, IAccessService access, AdminServi
         if(!AccessRules.HasPermission(profile,"budget.read"))throw AppException.Forbidden();
         if(!string.IsNullOrEmpty(department))await Demand(actor,"budget.read",department,ct);
         // A single SQL statement keeps allocations, adjustments and effective entries at the same read point.
-        var allocations=AssetOperationsService.Scoped(db.BudgetAllocations.AsNoTracking(),profile,"budget.read")
-            .Where(x=>x.Year==year&&(department==null||department==""||x.DepartmentId==department)&&(category==null||category==""||x.Category==category))
-            .Select(x=>new{x.DepartmentId,x.Category,Allocated=x.Amount,Spent=0m,Received=0m});
+        var allocations=from p in AssetOperationsService.Scoped(db.BudgetProposals.AsNoTracking(),profile,"budget.read")
+            where p.Year==year&&(department==null||department==""||p.DepartmentId==department)&&(category==null||category==""||p.Category==category)
+            join a in db.BudgetAllocations on p.Id equals a.ProposalId
+            select new{p.DepartmentId,p.Category,Allocated=a.Amount,Spent=0m,Received=0m};
         var adjustments=AssetOperationsService.Scoped(db.BudgetAdjustments.AsNoTracking(),profile,"budget.read")
             .Where(x=>x.Year==year&&x.Status=="approved"&&(department==null||department==""||x.DepartmentId==department)&&(category==null||category==""||x.Category==category))
             .Select(x=>new{x.DepartmentId,x.Category,Allocated=x.Amount,Spent=0m,Received=0m});
@@ -131,7 +166,7 @@ public class FinanceService(HpuniDbContext db, IAccessService access, AdminServi
             if(kind is not("receipt" or "expense"))throw AppException.Invalid("Loại giao dịch không hợp lệ.");
             Year(input.Year);Category(input.Category);Money(input.Amount);var department=await Department(input.DepartmentId,ct);
             if(input.Date.Year!=input.Year)throw AppException.Invalid("Ngày chứng từ phải thuộc năm tài chính.");
-            var voucher=AdminService.Required(input.Voucher,100);var normalized=voucher.ToUpperInvariant();
+            var voucher=AdminService.Required(input.Voucher,100);
             PaymentRequest? payment=null;
             // Lock order: source request, budget, voucher. All writers use this order.
             if(input.PaymentRequestId!=null){
@@ -149,8 +184,8 @@ public class FinanceService(HpuniDbContext db, IAccessService access, AdminServi
             }
             // SQL collation may be accent-insensitive; serialize the short voucher registry globally.
             await TransactionLocks.Acquire(db,"finance-vouchers",ct);
-            if(await db.FinanceEntries.AnyAsync(x=>x.Year==input.Year&&x.NormalizedVoucher==normalized,ct))throw new AppException(409,"VOUCHER_EXISTS","Số chứng từ đã được dùng trong năm tài chính.");
-            var e=new FinanceEntry{DepartmentId=department,Year=input.Year,Category=input.Category,Kind=kind,Amount=input.Amount,Voucher=voucher,NormalizedVoucher=normalized,Date=input.Date,Content=AdminService.Required(input.Content,2000),ActorId=actor,PaymentRequestId=payment?.Id};
+            if(await db.FinanceEntries.AnyAsync(x=>x.Year==input.Year&&x.Voucher==voucher,ct))throw new AppException(409,"VOUCHER_EXISTS","Số chứng từ đã được dùng trong năm tài chính.");
+            var e=new FinanceEntry{DepartmentId=department,Year=input.Year,Category=input.Category,Kind=kind,Amount=input.Amount,Voucher=voucher,Date=input.Date,Content=AdminService.Required(input.Content,2000),ActorId=actor,PaymentRequestId=payment?.Id};
             db.FinanceEntries.Add(e);if(payment!=null)payment.Status=await Paid(payment.Id,ct)+input.Amount==payment.Amount?"paid":"part_paid";
             admin.Audit(actor,"finance."+kind,e.Id,new{input,e.PaymentRequestId});await db.SaveChangesAsync(ct);return View(e);
         },ct);

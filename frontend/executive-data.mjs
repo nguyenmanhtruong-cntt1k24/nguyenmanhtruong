@@ -3,7 +3,7 @@ export const UNITS = ['Khoa CNTT','Khoa Kinh tế','Phòng Quản trị'];
 export const amount = r => r.items.reduce((s,i)=>s+i.quantity*i.price,0);
 export function createSeed(){
   const item=(name,quantity,price)=>({name,quantity,price});
-  const request=(id,title,unit,year,status,submitted,items,extra={})=>({id,title,unit,year,status,submitted,items,version:1,author:'Nguyễn Thu Hà · Phòng Kế hoạch – Tài chính',purpose:'Đáp ứng kế hoạch giảng dạy, học tập và vận hành năm tài chính.',...extra});
+  const request=(id,title,unit,year,status,submitted,items,extra={})=>({id,title,unit,year,status,submitted,items,version:1,author:'Nguyễn Thu Hà · Phòng Kế hoạch – Tài chính',...(status==='pending'?{appraisal:{opinion:'Hồ sơ mẫu đã được KHTC kiểm tra khoản mục và nguồn kinh phí.',actor:'Phòng Kế hoạch – Tài chính',at:submitted+'T08:00:00+07:00'}}:{}),purpose:'Đáp ứng kế hoạch giảng dạy, học tập và vận hành năm tài chính.',...extra});
   return {version:1,revision:0,requests:[
     request('DT-2026-014','Trang bị phòng thực hành máy tính','Khoa CNTT',2026,'pending','2026-11-01',[item('Máy tính phục vụ thực hành',20,18000000),item('Thiết bị mạng và lắp đặt',1,40000000)],{priority:true,purpose:'Bổ sung 20 máy tính và nâng cấp kết nối mạng cho phòng thực hành, phục vụ học kỳ II.'}),
     request('DT-2026-015','Bảo trì hệ thống điều hòa khu A','Phòng Quản trị',2026,'pending','2026-11-02',[item('Bảo dưỡng điều hòa',30,1200000),item('Vật tư thay thế',1,24000000)],{purpose:'Bảo dưỡng định kỳ thiết bị khu giảng đường A, thay thế vật tư đã xuống cấp.'}),
@@ -33,12 +33,14 @@ export function budgetRows(db,year,unit=''){
   }).filter(r=>r.total||r.spent);
 }
 export function decide(db,{id,version,status,opinion='',at=new Date().toISOString()}){
-  if(!['approved','rejected'].includes(status)) throw Error('Quyết định không hợp lệ.');
+  if(!['approved','rejected','returned'].includes(status)) throw Error('Quyết định không hợp lệ.');
   const r=db.requests.find(r=>r.id===id);
   if(!r||r.status!=='pending'||r.version!==version) throw Error('Hồ sơ đã thay đổi hoặc đã được xử lý. Đóng và mở lại hồ sơ.');
+  if(!r.appraisal) throw Error('Hồ sơ chưa có kết quả thẩm định KHTC. Chuyển về KHTC để kiểm tra trước khi quyết định.');
+  if(status!=='approved'&&!opinion.trim())throw Error('Vui lòng nhập lý do yêu cầu điều chỉnh hoặc không phê duyệt.');
   if(opinion.length>2000) throw Error('Ý kiến tối đa 2.000 ký tự.');
   const next=structuredClone(db), target=next.requests.find(r=>r.id===id);
-  Object.assign(target,{status,opinion:opinion.trim(),decisionAt:at,reviewer:'Ban Giám hiệu · Phiên demo',version:r.version+1});
+  Object.assign(target,{status,opinion:opinion.trim(),decisionAt:at,reviewer:'Ban Giám hiệu · Phiên demo',version:r.version+1,workflow:[...(r.workflow||[]),{action:status==='returned'?'BGH yêu cầu điều chỉnh':status==='approved'?'BGH phê duyệt':'BGH không phê duyệt',opinion:opinion.trim(),at,actor:'Ban Giám hiệu'}]});
   next.revision++;
   return next;
 }

@@ -25,60 +25,74 @@ namespace Hpuni.Infrastructure.Migrations
             modelBuilder.Entity("Hpuni.Domain.AssetDisposal", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaPhieuThanhLyTaiSan");
 
                     b.Property<string>("ActorId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiThucHien");
 
                     b.Property<string>("AssetGroupId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNhomTaiSan");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayTao");
 
                     b.Property<int>("Damaged")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongHong");
 
                     b.Property<string>("DepartmentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDonVi");
 
                     b.Property<int>("Good")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongTot");
 
                     b.Property<string>("Reason")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("LyDo");
 
                     b.Property<string>("Reference")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("SoThamChieu");
 
                     b.Property<string>("ReviewNote")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("GhiChuDuyet");
 
                     b.Property<DateTimeOffset?>("ReviewedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayDuyet");
 
                     b.Property<string>("ReviewerId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiDuyet");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("TrangThai");
 
                     b.HasKey("Id");
 
@@ -92,58 +106,69 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.ToTable("PhieuThanhLyTaiSan", "QuanLyTaiSan", t =>
                         {
-                            t.HasCheckConstraint("CK_AssetDisposal_Quantity", "[Good] BETWEEN 0 AND 1000000 AND [Damaged] BETWEEN 0 AND 1000000 AND [Good]+[Damaged] BETWEEN 1 AND 1000000");
+                            t.HasCheckConstraint("CK_AssetDisposal_Quantity", "[SoLuongTot] BETWEEN 0 AND 1000000 AND [SoLuongHong] BETWEEN 0 AND 1000000 AND [SoLuongTot]+[SoLuongHong] BETWEEN 1 AND 1000000");
 
-                            t.HasCheckConstraint("CK_AssetDisposal_Status", "([Status] = 'pending' AND [ReviewerId] IS NULL AND [ReviewedAt] IS NULL) OR ([Status] IN ('approved','rejected') AND [ReviewerId] IS NOT NULL AND [ReviewedAt] IS NOT NULL AND [ReviewerId] <> [ActorId])");
+                            t.HasCheckConstraint("CK_AssetDisposal_Status", "([TrangThai] = 'pending' AND [MaNguoiDuyet] IS NULL AND [NgayDuyet] IS NULL) OR ([TrangThai] IN ('approved','rejected') AND [MaNguoiDuyet] IS NOT NULL AND [NgayDuyet] IS NOT NULL AND [MaNguoiDuyet] <> [MaNguoiThucHien])");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.AssetGroup", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNhomTaiSan");
 
                     b.Property<bool>("Active")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("HoatDong");
 
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("DanhMuc");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("MaSoNhomTaiSan");
 
                     b.Property<int>("Damaged")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongHong");
 
                     b.Property<string>("DepartmentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDonVi");
 
                     b.Property<int>("Lost")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongMat");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("Ten");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.Property<int>("Total")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("TongSo");
 
                     b.Property<string>("Unit")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("DonViTinh");
 
                     b.HasKey("Id");
 
@@ -154,7 +179,7 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.ToTable("NhomTaiSan", "QuanLyTaiSan", t =>
                         {
-                            t.HasCheckConstraint("CK_Asset_Quantity", "[Total] BETWEEN 0 AND 1000000 AND [Damaged] BETWEEN 0 AND 1000000 AND [Lost] BETWEEN 0 AND 1000000 AND [Damaged] + [Lost] <= [Total]");
+                            t.HasCheckConstraint("CK_Asset_Quantity", "[TongSo] BETWEEN 0 AND 1000000 AND [SoLuongHong] BETWEEN 0 AND 1000000 AND [SoLuongMat] BETWEEN 0 AND 1000000 AND [SoLuongHong] + [SoLuongMat] <= [TongSo]");
                         });
                 });
 
@@ -162,90 +187,115 @@ namespace Hpuni.Infrastructure.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("MaNhatKyHeThong");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("HanhDong");
 
                     b.Property<string>("ActorId")
                         .IsRequired()
                         .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiThucHien");
 
                     b.Property<DateTimeOffset>("At")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("ThoiDien");
 
                     b.Property<string>("DetailJson")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("ChiTiet");
 
                     b.Property<string>("TargetId")
                         .IsRequired()
                         .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDoiTuong");
 
                     b.HasKey("Id");
 
                     b.HasIndex("At");
 
                     b.ToTable("NhatKyHeThong", "QuanTriVien");
+
+                    b.SplitToTable("DoiTuongNhatKy", "QuanTriVien", t =>
+                        {
+                            t.Property("Id");
+
+                            t.Property("TargetId");
+                        });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.BudgetAdjustment", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDieuChinhNganSach");
 
                     b.Property<string>("ActorId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiThucHien");
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18)
-                        .HasColumnType("decimal(18,0)");
+                        .HasColumnType("decimal(18,0)")
+                        .HasColumnName("SoTien");
 
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("DanhMuc");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayTao");
 
                     b.Property<string>("DepartmentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDonVi");
 
                     b.Property<string>("Reason")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("LyDo");
 
                     b.Property<string>("ReviewNote")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("GhiChuDuyet");
 
                     b.Property<string>("ReviewerId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiDuyet");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("TrangThai");
 
                     b.Property<int>("Year")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("Nam");
 
                     b.HasKey("Id");
 
@@ -257,108 +307,103 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.ToTable("DieuChinhNganSach", "BanGiamHieu", t =>
                         {
-                            t.HasCheckConstraint("CK_Adjustment_Amount", "[Amount] <> 0 AND ABS([Amount]) <= 1000000000000 AND [Year] BETWEEN 2000 AND 2100");
+                            t.HasCheckConstraint("CK_Adjustment_Amount", "[SoTien] <> 0 AND ABS([SoTien]) <= 1000000000000 AND [Nam] BETWEEN 2000 AND 2100");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.BudgetAllocation", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<string>("ProposalId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDeXuat");
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18)
-                        .HasColumnType("decimal(18,0)");
+                        .HasColumnType("decimal(18,0)")
+                        .HasColumnName("SoTien");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("DepartmentId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ProposalId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProposalId")
-                        .IsUnique();
-
-                    b.HasIndex("DepartmentId", "Year", "Category");
+                    b.HasKey("ProposalId");
 
                     b.ToTable("PhanBoNganSach", "BanGiamHieu", t =>
                         {
-                            t.HasCheckConstraint("CK_Allocation_Amount", "[Amount] > 0");
+                            t.HasCheckConstraint("CK_Allocation_Amount", "[SoTien] > 0");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.BudgetProposal", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDeXuat");
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18)
-                        .HasColumnType("decimal(18,0)");
+                        .HasColumnType("decimal(18,0)")
+                        .HasColumnName("SoTien");
 
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("DanhMuc");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayTao");
 
                     b.Property<string>("DepartmentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDonVi");
 
                     b.Property<string>("LinesJson")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("DongChiTietJson");
 
                     b.Property<string>("OwnerId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiSoHuu");
 
                     b.Property<string>("Purpose")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("MucDich");
 
                     b.Property<string>("ReviewNote")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("GhiChuDuyet");
 
                     b.Property<string>("ReviewerId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiDuyet");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("TrangThai");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("TieuDe");
 
                     b.Property<int>("Year")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("Nam");
 
                     b.HasKey("Id");
 
@@ -370,7 +415,7 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.ToTable("DeXuatNganSach", "BanGiamHieu", t =>
                         {
-                            t.HasCheckConstraint("CK_Proposal_Amount", "[Amount] > 0 AND [Year] BETWEEN 2000 AND 2100");
+                            t.HasCheckConstraint("CK_Proposal_Amount", "[SoTien] > 0 AND [Nam] BETWEEN 2000 AND 2100");
                         });
                 });
 
@@ -378,43 +423,45 @@ namespace Hpuni.Infrastructure.Migrations
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDonVi");
 
                     b.Property<bool>("Active")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("HoatDong");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("MaSoDonVi");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("NormalizedName")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("Ten")
+                        .UseCollation("Latin1_General_100_CI_AS");
 
                     b.Property<string>("Notes")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("GhiChuChung");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.HasIndex("NormalizedName")
+                    b.HasIndex("Name")
                         .IsUnique();
 
                     b.ToTable("DonVi", "QuanTriVien");
@@ -423,61 +470,76 @@ namespace Hpuni.Infrastructure.Migrations
             modelBuilder.Entity("Hpuni.Domain.EquipmentLoan", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaPhieuMuon");
 
                     b.Property<string>("AssetGroupId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNhomTaiSan");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayTao");
 
                     b.Property<string>("DepartmentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDonVi");
 
                     b.Property<DateTimeOffset>("End")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("KetThuc");
 
                     b.Property<DateTimeOffset?>("HandedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayBanGiao");
 
                     b.Property<string>("Note")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("GhiChu");
 
                     b.Property<string>("OwnerId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiSoHuu");
 
                     b.Property<string>("Purpose")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("MucDich");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuong");
 
                     b.Property<int?>("ReportedReceived")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongBaoDaNhan");
 
                     b.Property<int>("Returned")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongDaTra");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.Property<DateTimeOffset>("Start")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("BatDau");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("TrangThai");
 
                     b.HasKey("Id");
 
@@ -489,45 +551,53 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.ToTable("PhieuMuonThietBi", "GiangVien", t =>
                         {
-                            t.HasCheckConstraint("CK_Loan_Interval", "[Start] < [End]");
+                            t.HasCheckConstraint("CK_Loan_Interval", "[BatDau] < [KetThuc]");
 
-                            t.HasCheckConstraint("CK_Loan_Quantity", "[Quantity] BETWEEN 1 AND 1000000 AND [Returned] >= 0 AND [Returned] <= [Quantity] AND ([ReportedReceived] IS NULL OR [ReportedReceived] BETWEEN 0 AND [Quantity])");
+                            t.HasCheckConstraint("CK_Loan_Quantity", "[SoLuong] BETWEEN 1 AND 1000000 AND [SoLuongDaTra] >= 0 AND [SoLuongDaTra] <= [SoLuong] AND ([SoLuongBaoDaNhan] IS NULL OR [SoLuongBaoDaNhan] BETWEEN 0 AND [SoLuong])");
 
-                            t.HasCheckConstraint("CK_Loan_Status", "[Status] IN ('draft','pending','approved','rejected','cancelled','ready','receipt_disputed','borrowed','return_pending','completed') AND (([Status] IN ('ready','receipt_disputed','borrowed','return_pending','completed') AND [HandedAt] IS NOT NULL) OR ([Status] IN ('draft','pending','approved','rejected','cancelled') AND [HandedAt] IS NULL))");
+                            t.HasCheckConstraint("CK_Loan_Status", "[TrangThai] IN ('draft','pending','approved','rejected','cancelled','ready','receipt_disputed','borrowed','return_pending','completed') AND (([TrangThai] IN ('ready','receipt_disputed','borrowed','return_pending','completed') AND [NgayBanGiao] IS NOT NULL) OR ([TrangThai] IN ('draft','pending','approved','rejected','cancelled') AND [NgayBanGiao] IS NULL))");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.EquipmentMovement", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaBienDongThietBi");
 
                     b.Property<string>("ActorId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiThucHien");
 
                     b.Property<string>("AssetGroupId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNhomTaiSan");
 
                     b.Property<DateTimeOffset>("At")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("ThoiDiem");
 
                     b.Property<string>("Kind")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("PhanLoai");
 
                     b.Property<string>("LoanId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaPhieuMuon");
 
                     b.Property<string>("Note")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("GhiChu");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuong");
 
                     b.HasKey("Id");
 
@@ -539,55 +609,68 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.ToTable("BienDongThietBi", "QuanLyTaiSan", t =>
                         {
-                            t.HasCheckConstraint("CK_Movement_Quantity", "([Kind] IN ('disposal.good','disposal.damaged') AND [Quantity] BETWEEN -1000000 AND -1) OR ([Kind] NOT IN ('disposal.good','disposal.damaged') AND [Quantity] BETWEEN 1 AND 1000000)");
+                            t.HasCheckConstraint("CK_Movement_Quantity", "([PhanLoai] IN ('disposal.good','disposal.damaged') AND [SoLuong] BETWEEN -1000000 AND -1) OR ([PhanLoai] NOT IN ('disposal.good','disposal.damaged') AND [SoLuong] BETWEEN 1 AND 1000000)");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.EquipmentReturn", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaPhieuTraThietBi");
 
                     b.Property<string>("AcceptanceNote")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("GhiChuNghiemThu");
 
                     b.Property<DateTimeOffset?>("AcceptedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayNghiemThu");
 
                     b.Property<string>("AcceptedBy")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiNghiemThu");
 
                     b.Property<int?>("AcceptedDamaged")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongHongNghiemThu");
 
                     b.Property<int?>("AcceptedGood")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongTotNghiemThu");
 
                     b.Property<int?>("AcceptedLost")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongMatNghiemThu");
 
                     b.Property<DateTimeOffset>("At")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("ThoiDiem");
 
                     b.Property<int>("Damaged")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongHong");
 
                     b.Property<int>("Good")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongTot");
 
                     b.Property<string>("LoanId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaPhieuMuon");
 
                     b.Property<int>("Lost")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongMat");
 
                     b.Property<string>("Note")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("GhiChu");
 
                     b.HasKey("Id");
 
@@ -595,60 +678,71 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.HasIndex("LoanId")
                         .IsUnique()
-                        .HasFilter("[AcceptedAt] IS NULL");
+                        .HasFilter("[NgayNghiemThu] IS NULL");
 
                     b.ToTable("PhieuTraThietBi", "GiangVien", t =>
                         {
-                            t.HasCheckConstraint("CK_Return_Quantity", "[Good] BETWEEN 0 AND 1000000 AND [Damaged] BETWEEN 0 AND 1000000 AND [Lost] BETWEEN 0 AND 1000000 AND [Good]+[Damaged]+[Lost] BETWEEN 1 AND 1000000 AND (([AcceptedAt] IS NULL AND [AcceptedGood] IS NULL AND [AcceptedDamaged] IS NULL AND [AcceptedLost] IS NULL AND [AcceptedBy] IS NULL) OR ([AcceptedAt] IS NOT NULL AND [AcceptedBy] IS NOT NULL AND [AcceptedGood] IS NOT NULL AND [AcceptedDamaged] IS NOT NULL AND [AcceptedLost] IS NOT NULL AND [AcceptedGood] BETWEEN 0 AND 1000000 AND [AcceptedDamaged] BETWEEN 0 AND 1000000 AND [AcceptedLost] BETWEEN 0 AND 1000000 AND [AcceptedGood]+[AcceptedDamaged]+[AcceptedLost] BETWEEN 1 AND [Good]+[Damaged]+[Lost]))");
+                            t.HasCheckConstraint("CK_Return_Quantity", "[SoLuongTot] BETWEEN 0 AND 1000000 AND [SoLuongHong] BETWEEN 0 AND 1000000 AND [SoLuongMat] BETWEEN 0 AND 1000000 AND [SoLuongTot]+[SoLuongHong]+[SoLuongMat] BETWEEN 1 AND 1000000 AND (([NgayNghiemThu] IS NULL AND [SoLuongTotNghiemThu] IS NULL AND [SoLuongHongNghiemThu] IS NULL AND [SoLuongMatNghiemThu] IS NULL AND [MaNguoiNghiemThu] IS NULL) OR ([NgayNghiemThu] IS NOT NULL AND [MaNguoiNghiemThu] IS NOT NULL AND [SoLuongTotNghiemThu] IS NOT NULL AND [SoLuongHongNghiemThu] IS NOT NULL AND [SoLuongMatNghiemThu] IS NOT NULL AND [SoLuongTotNghiemThu] BETWEEN 0 AND 1000000 AND [SoLuongHongNghiemThu] BETWEEN 0 AND 1000000 AND [SoLuongMatNghiemThu] BETWEEN 0 AND 1000000 AND [SoLuongTotNghiemThu]+[SoLuongHongNghiemThu]+[SoLuongMatNghiemThu] BETWEEN 1 AND [SoLuongTot]+[SoLuongHong]+[SoLuongMat]))");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.EquipmentUseLog", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNhatKySuDungThietBi");
 
                     b.Property<DateTimeOffset?>("ActualEnd")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("KetThucThucTe");
 
                     b.Property<DateTimeOffset?>("ActualStart")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("BatDauThucTe");
 
                     b.Property<string>("Condition")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("TinhTrang");
 
                     b.Property<string>("Issue")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("VanDe");
 
                     b.Property<string>("LoanId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaPhieuMuon");
 
                     b.Property<int?>("Quantity")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuong");
 
                     b.Property<string>("ReviewNote")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("GhiChuDuyet");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("TrangThai");
 
                     b.Property<bool>("Used")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("DaSuDung");
 
                     b.HasKey("Id");
 
@@ -657,101 +751,135 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.ToTable("NhatKySuDungThietBi", "GiangVien", t =>
                         {
-                            t.HasCheckConstraint("CK_EquipmentLog_Valid", "[Status] IN ('submitted','needs_changes','confirmed') AND (([Used]=0 AND [ActualStart] IS NULL AND [ActualEnd] IS NULL AND [Quantity] IS NULL) OR ([Used]=1 AND [ActualStart] IS NOT NULL AND [ActualEnd] IS NOT NULL AND [Quantity] IS NOT NULL AND [ActualStart]<[ActualEnd] AND [Quantity] BETWEEN 1 AND 1000000))");
+                            t.HasCheckConstraint("CK_EquipmentLog_Valid", "[TrangThai] IN ('submitted','needs_changes','confirmed') AND (([DaSuDung]=0 AND [BatDauThucTe] IS NULL AND [KetThucThucTe] IS NULL AND [SoLuong] IS NULL) OR ([DaSuDung]=1 AND [BatDauThucTe] IS NOT NULL AND [KetThucThucTe] IS NOT NULL AND [SoLuong] IS NOT NULL AND [BatDauThucTe]<[KetThucThucTe] AND [SoLuong] BETWEEN 1 AND 1000000))");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.FinanceEntry", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaChungTu");
 
                     b.Property<string>("ActorId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiThucHien");
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18)
-                        .HasColumnType("decimal(18,0)");
+                        .HasColumnType("decimal(18,0)")
+                        .HasColumnName("SoTien");
 
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("DanhMuc");
 
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("NoiDung");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayTao");
 
                     b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
+                        .HasColumnType("date")
+                        .HasColumnName("Ngay");
 
                     b.Property<string>("DepartmentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDonVi");
+
+                    b.Property<string>("FundingProposalId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDuToanNhanKinhPhi");
 
                     b.Property<string>("Kind")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("NormalizedVoucher")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(10)")
+                        .HasColumnName("PhanLoai");
 
                     b.Property<string>("PaymentRequestId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDeNghiThanhToan");
 
                     b.Property<string>("Voucher")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("SoChungTu")
+                        .UseCollation("Latin1_General_100_CI_AS");
 
                     b.Property<int>("Year")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("Nam");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ActorId");
+                    b.HasIndex("FundingProposalId");
+
+                    b.HasIndex("Kind");
 
                     b.HasIndex("PaymentRequestId");
 
-                    b.HasIndex("Year", "NormalizedVoucher")
+                    b.HasIndex("Year", "Voucher")
                         .IsUnique();
 
-                    b.HasIndex("DepartmentId", "Year", "Category", "Kind");
+                    b.HasIndex("DepartmentId", "Year", "Category");
 
-                    b.ToTable("ChungTuTaiChinh", "KeToan", t =>
+                    b.HasIndex("DepartmentId", "Year", "Date", "Id");
+
+                    b.ToTable("ChiTietChungTu", "KeToan");
+
+                    b.SplitToTable("ChungTuTaiChinh", "KeToan", t =>
                         {
-                            t.HasCheckConstraint("CK_Entry_Amount", "[Amount] > 0 AND [Year] BETWEEN 2000 AND 2100 AND YEAR([Date]) = [Year] AND [Kind] IN ('receipt','expense')");
+                            t.Property("Id");
+
+                            t.Property("ActorId");
+
+                            t.Property("Amount");
+
+                            t.Property("Content");
+
+                            t.Property("CreatedAt");
+
+                            t.Property("Kind");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.FinanceReversal", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaButToanDao");
 
                     b.Property<string>("ActorId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiThucHien");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayTao");
 
                     b.Property<string>("EntryId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaChungTu");
 
                     b.Property<string>("Reason")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("LyDo");
 
                     b.HasKey("Id");
 
@@ -766,31 +894,38 @@ namespace Hpuni.Infrastructure.Migrations
             modelBuilder.Entity("Hpuni.Domain.FiscalPeriod", b =>
                 {
                     b.Property<string>("DepartmentId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDonVi");
 
                     b.Property<int>("Year")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("Nam");
 
                     b.Property<string>("ActorId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiThucHien");
 
                     b.Property<DateTimeOffset>("ChangedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayThayDoi");
 
                     b.Property<bool>("Closed")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("DaKhoa");
 
                     b.Property<string>("Reason")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("LyDo");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.HasKey("DepartmentId", "Year");
 
@@ -798,49 +933,58 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.ToTable("KyKeToan", "KeToan", t =>
                         {
-                            t.HasCheckConstraint("CK_FiscalPeriod_Year", "[Year] BETWEEN 2000 AND 2100");
+                            t.HasCheckConstraint("CK_FiscalPeriod_Year", "[Nam] BETWEEN 2000 AND 2100");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.FixedAssetProfile", b =>
                 {
                     b.Property<string>("AssetGroupId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNhomTaiSan");
 
                     b.Property<DateOnly>("AcquisitionDate")
-                        .HasColumnType("date");
+                        .HasColumnType("date")
+                        .HasColumnName("NgayMua");
 
                     b.Property<decimal>("AcquisitionValue")
                         .HasPrecision(18)
-                        .HasColumnType("decimal(18,0)");
+                        .HasColumnType("decimal(18,0)")
+                        .HasColumnName("GiaTriMua");
 
                     b.Property<string>("ActorId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiThucHien");
 
                     b.Property<string>("Note")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("GhiChu");
 
                     b.Property<string>("Reference")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("SoThamChieu");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.Property<string>("Source")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("NguonGoc");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayCapNhat");
 
                     b.HasKey("AssetGroupId");
 
@@ -848,7 +992,7 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.ToTable("HoSoTaiSanCoDinh", "QuanLyTaiSan", t =>
                         {
-                            t.HasCheckConstraint("CK_FixedAssetProfile_Value", "[AcquisitionValue] BETWEEN 1 AND 1000000000000 AND [AcquisitionDate] >= '1900-01-01'");
+                            t.HasCheckConstraint("CK_FixedAssetProfile_Value", "[GiaTriMua] BETWEEN 1 AND 1000000000000 AND [NgayMua] >= '1900-01-01'");
                         });
                 });
 
@@ -856,28 +1000,34 @@ namespace Hpuni.Infrastructure.Migrations
                 {
                     b.Property<string>("ActorId")
                         .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiThucHien");
 
                     b.Property<string>("Key")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Khoa");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayTao");
 
                     b.Property<string>("Operation")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("ThaoTac");
 
                     b.Property<string>("PayloadHash")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasColumnType("nvarchar(64)")
+                        .HasColumnName("MaBamNoiDung");
 
                     b.Property<string>("ResultJson")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("KetQuaJson");
 
                     b.HasKey("ActorId", "Key");
 
@@ -887,47 +1037,58 @@ namespace Hpuni.Infrastructure.Migrations
             modelBuilder.Entity("Hpuni.Domain.InventoryItem", b =>
                 {
                     b.Property<string>("SessionId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDotKiemKe");
 
                     b.Property<string>("AssetGroupId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNhomTaiSan");
 
                     b.Property<int?>("Actual")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongThucTe");
 
                     b.Property<string>("AssetVersion")
                         .IsRequired()
                         .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
+                        .HasColumnType("nvarchar(40)")
+                        .HasColumnName("PhienBanTaiSan");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("MaSoChiTietKiemKe");
 
                     b.Property<string>("Condition")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("TinhTrang");
 
                     b.Property<int>("Expected")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongDuKien");
 
                     b.Property<int>("ExpectedDamaged")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongHongDuKien");
 
                     b.Property<int>("ExpectedLost")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongMatDuKien");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("Ten");
 
                     b.Property<string>("Note")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("GhiChu");
 
                     b.HasKey("SessionId", "AssetGroupId");
 
@@ -935,37 +1096,43 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.ToTable("ChiTietKiemKe", "QuanLyTaiSan", t =>
                         {
-                            t.HasCheckConstraint("CK_Inventory_Count", "[Expected] BETWEEN 0 AND 1000000 AND [ExpectedDamaged]>=0 AND [ExpectedLost]>=0 AND [ExpectedDamaged]+[ExpectedLost]<=[Expected] AND ([Actual] IS NULL OR [Actual] BETWEEN 0 AND 1000000) AND [Condition] IN ('','good','damaged','missing')");
+                            t.HasCheckConstraint("CK_Inventory_Count", "[SoLuongDuKien] BETWEEN 0 AND 1000000 AND [SoLuongHongDuKien]>=0 AND [SoLuongMatDuKien]>=0 AND [SoLuongHongDuKien]+[SoLuongMatDuKien]<=[SoLuongDuKien] AND ([SoLuongThucTe] IS NULL OR [SoLuongThucTe] BETWEEN 0 AND 1000000) AND [TinhTrang] IN ('','good','damaged','missing')");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.InventorySession", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDotKiemKe");
 
                     b.Property<DateTimeOffset>("At")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("ThoiDiem");
 
                     b.Property<string>("DepartmentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDonVi");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("Ten");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("TrangThai");
 
                     b.HasKey("Id");
 
@@ -973,92 +1140,124 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.ToTable("DotKiemKe", "QuanLyTaiSan", t =>
                         {
-                            t.HasCheckConstraint("CK_Inventory_Status", "[Status] IN ('open','completed')");
+                            t.HasCheckConstraint("CK_Inventory_Status", "[TrangThai] IN ('open','completed')");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.LoginSession", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiDung");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayTao");
 
                     b.Property<DateTimeOffset>("ExpiresAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayHetPhien");
+
+                    b.Property<string>("Id")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("MaPhienDangNhap");
 
                     b.Property<DateTimeOffset?>("RevokedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayThuHoi");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.HasKey("UserId", "CreatedAt");
 
-                    b.HasKey("Id");
+                    b.HasIndex("Id")
+                        .IsUnique()
+                        .HasFilter("[MaPhienDangNhap] IS NOT NULL");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("PhienDangNhap", "QuanTriVien");
+
+                    b.SplitToTable("DinhDanhPhienDangNhap", "QuanTriVien", t =>
+                        {
+                            t.Property("UserId");
+
+                            t.Property("CreatedAt");
+
+                            t.Property("Id");
+
+                            t.Property("RevokedAt");
+                        });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.MaintenanceOrder", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaPhieuBaoTri");
 
                     b.Property<string>("AssetGroupId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNhomTaiSan");
 
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("NoiDung");
 
                     b.Property<decimal>("Cost")
                         .HasPrecision(18)
-                        .HasColumnType("decimal(18,0)");
+                        .HasColumnType("decimal(18,0)")
+                        .HasColumnName("ChiPhi");
 
                     b.Property<string>("DepartmentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDonVi");
 
                     b.Property<DateTimeOffset>("End")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("KetThuc");
 
                     b.Property<string>("Mode")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("CheDo");
 
                     b.Property<string>("Note")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("GhiChu");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuong");
 
                     b.Property<string>("Result")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("KetQua");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.Property<DateTimeOffset>("Start")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("BatDau");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("TrangThai");
 
                     b.HasKey("Id");
 
@@ -1068,26 +1267,30 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.ToTable("PhieuBaoTri", "QuanLyTaiSan", t =>
                         {
-                            t.HasCheckConstraint("CK_Maintenance_Valid", "[Quantity] BETWEEN 1 AND 1000000 AND [Start] < [End] AND [Mode] IN ('service','repair') AND [Status] IN ('planned','running','completed','cancelled') AND [Cost] BETWEEN 0 AND 1000000000000 AND (([Status]='completed' AND [Result] IN ('good','unavailable')) OR ([Status]<>'completed' AND [Result]=''))");
+                            t.HasCheckConstraint("CK_Maintenance_Valid", "[SoLuong] BETWEEN 1 AND 1000000 AND [BatDau] < [KetThuc] AND [CheDo] IN ('service','repair') AND [TrangThai] IN ('planned','running','completed','cancelled') AND [ChiPhi] BETWEEN 0 AND 1000000000000 AND (([TrangThai]='completed' AND [KetQua] IN ('good','unavailable')) OR ([TrangThai]<>'completed' AND [KetQua]=''))");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.NotificationReadState", b =>
                 {
                     b.Property<string>("ActorId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiThucHien");
 
                     b.Property<string>("SourceKey")
                         .HasMaxLength(120)
-                        .HasColumnType("nvarchar(120)");
+                        .HasColumnType("nvarchar(120)")
+                        .HasColumnName("KhoaNguon");
 
                     b.Property<DateTimeOffset>("ReadAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayDoc");
 
                     b.Property<byte[]>("SourceVersion")
                         .IsRequired()
                         .HasMaxLength(8)
-                        .HasColumnType("varbinary(8)");
+                        .HasColumnType("varbinary(8)")
+                        .HasColumnName("PhienBanNguon");
 
                     b.HasKey("ActorId", "SourceKey");
 
@@ -1097,40 +1300,49 @@ namespace Hpuni.Infrastructure.Migrations
             modelBuilder.Entity("Hpuni.Domain.PaymentRequest", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDeNghiThanhToan");
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18)
-                        .HasColumnType("decimal(18,0)");
+                        .HasColumnType("decimal(18,0)")
+                        .HasColumnName("SoTien");
 
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("NoiDung");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayTao");
 
                     b.Property<string>("DepartmentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDonVi");
 
                     b.Property<string>("MaintenanceId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaPhieuBaoTri");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("TrangThai");
 
                     b.Property<int>("Year")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("Nam");
 
                     b.HasKey("Id");
 
@@ -1138,85 +1350,103 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.HasIndex("MaintenanceId")
                         .IsUnique()
-                        .HasFilter("[MaintenanceId] IS NOT NULL");
+                        .HasFilter("[MaPhieuBaoTri] IS NOT NULL");
 
                     b.ToTable("DeNghiThanhToan", "KeToan", t =>
                         {
-                            t.HasCheckConstraint("CK_Payment_Amount", "[Amount] > 0 AND [Year] BETWEEN 2000 AND 2100");
+                            t.HasCheckConstraint("CK_Payment_Amount", "[SoTien] > 0 AND [Nam] BETWEEN 2000 AND 2100");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.RoleAccountOverride", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiDung");
 
                     b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaVaiTro");
 
                     b.Property<string>("PermissionsJson")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("DanhSachQuyenJson");
 
                     b.Property<string>("Scope")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("nvarchar(10)")
+                        .HasColumnName("PhamVi");
 
                     b.HasKey("UserId", "RoleId");
 
                     b.ToTable("TuyChinhVaiTroNguoiDung", "QuanTriVien");
+
+                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
                 });
 
             modelBuilder.Entity("Hpuni.Domain.RolePermission", b =>
                 {
                     b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaVaiTro");
 
                     b.Property<string>("Permission")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Quyen");
 
                     b.HasKey("RoleId", "Permission");
 
                     b.ToTable("QuyenVaiTro", "QuanTriVien");
+
+                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
                 });
 
             modelBuilder.Entity("Hpuni.Domain.Room", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaPhong");
 
                     b.Property<bool>("Active")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("HoatDong");
 
                     b.Property<int>("Capacity")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SucChua");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("MaSoPhong");
 
                     b.Property<string>("DepartmentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDonVi");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("Ten");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Loai");
 
                     b.HasKey("Id");
 
@@ -1227,62 +1457,75 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.ToTable("Phong", "QuanLyTaiSan", t =>
                         {
-                            t.HasCheckConstraint("CK_Room_Capacity", "[Capacity] > 0");
+                            t.HasCheckConstraint("CK_Room_Capacity", "[SucChua] > 0");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.RoomRequest", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaPhieuDangKy");
 
                     b.Property<int>("Attendees")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoNguoiThamDu");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayTao");
 
                     b.Property<string>("DepartmentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDonVi");
 
                     b.Property<DateTimeOffset>("End")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("KetThuc");
 
                     b.Property<string>("OwnerId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiSoHuu");
 
                     b.Property<string>("Purpose")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("MucDich");
 
                     b.Property<string>("ReviewNote")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("GhiChuDuyet");
 
                     b.Property<string>("ReviewedBy")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("MaNguoiXetDuyet");
 
                     b.Property<string>("RoomId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaPhong");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.Property<DateTimeOffset>("Start")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("BatDau");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("TrangThai");
 
                     b.HasKey("Id");
 
@@ -1294,112 +1537,133 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.ToTable("PhieuDangKyPhong", "GiangVien", t =>
                         {
-                            t.HasCheckConstraint("CK_Request_Attendees", "[Attendees] > 0");
+                            t.HasCheckConstraint("CK_Request_Attendees", "[SoNguoiThamDu] > 0");
 
-                            t.HasCheckConstraint("CK_Request_Interval", "[Start] < [End]");
+                            t.HasCheckConstraint("CK_Request_Interval", "[BatDau] < [KetThuc]");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.RoomReservation", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaLichDatPhong");
 
                     b.Property<bool>("Active")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("HoatDong");
 
                     b.Property<DateTimeOffset>("End")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("KetThuc");
 
                     b.Property<string>("Kind")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("PhanLoai");
 
                     b.Property<string>("Note")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("GhiChu");
 
                     b.Property<string>("RequestId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaPhieuDangKy");
 
                     b.Property<string>("RoomId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaPhong");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.Property<DateTimeOffset>("Start")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("BatDau");
 
                     b.HasKey("Id");
 
                     b.HasIndex("RequestId")
                         .IsUnique()
-                        .HasFilter("[RequestId] IS NOT NULL");
+                        .HasFilter("[MaPhieuDangKy] IS NOT NULL");
 
                     b.HasIndex("RoomId", "Active", "Start", "End");
 
                     b.ToTable("LichDatPhong", "QuanLyTaiSan", t =>
                         {
-                            t.HasCheckConstraint("CK_Reservation_Interval", "[Start] < [End]");
+                            t.HasCheckConstraint("CK_Reservation_Interval", "[BatDau] < [KetThuc]");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.RoomUseLog", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNhatKySuDungPhong");
 
                     b.Property<DateTimeOffset?>("ActualEnd")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("KetThucThucTe");
 
                     b.Property<DateTimeOffset?>("ActualStart")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("BatDauThucTe");
 
                     b.Property<int?>("Attendees")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoNguoiThamDu");
 
                     b.Property<string>("Condition")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("TinhTrang");
 
                     b.Property<string>("Issue")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("VanDe");
 
                     b.Property<string>("RequestId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaPhieuDangKy");
 
                     b.Property<string>("ReviewNote")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("GhiChuDuyet");
 
                     b.Property<string>("ReviewedBy")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("MaNguoiXetDuyet");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("TrangThai");
 
                     b.Property<bool>("Used")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("DaSuDung");
 
                     b.HasKey("Id");
 
@@ -1408,17 +1672,19 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.ToTable("NhatKySuDungPhong", "GiangVien", t =>
                         {
-                            t.HasCheckConstraint("CK_RoomLog_Actual", "([Used] = 0 AND [ActualStart] IS NULL AND [ActualEnd] IS NULL AND [Attendees] IS NULL) OR ([Used] = 1 AND [ActualStart] IS NOT NULL AND [ActualEnd] IS NOT NULL AND [Attendees] IS NOT NULL AND [ActualStart] < [ActualEnd] AND [Attendees] >= 0)");
+                            t.HasCheckConstraint("CK_RoomLog_Actual", "([DaSuDung] = 0 AND [BatDauThucTe] IS NULL AND [KetThucThucTe] IS NULL AND [SoNguoiThamDu] IS NULL) OR ([DaSuDung] = 1 AND [BatDauThucTe] IS NOT NULL AND [KetThucThucTe] IS NOT NULL AND [SoNguoiThamDu] IS NOT NULL AND [BatDauThucTe] < [KetThucThucTe] AND [SoNguoiThamDu] >= 0)");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.UserDepartmentScope", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiDung");
 
                     b.Property<string>("DepartmentId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDonVi");
 
                     b.HasKey("UserId", "DepartmentId");
 
@@ -1430,11 +1696,13 @@ namespace Hpuni.Infrastructure.Migrations
             modelBuilder.Entity("Hpuni.Domain.UserPermissionDenial", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiDung");
 
                     b.Property<string>("Permission")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Quyen");
 
                     b.HasKey("UserId", "Permission");
 
@@ -1444,36 +1712,44 @@ namespace Hpuni.Infrastructure.Migrations
             modelBuilder.Entity("Hpuni.Domain.VoucherAttachment", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaTepDinhKem");
 
                     b.Property<string>("ActorId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiThucHien");
 
                     b.Property<string>("ContentType")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("LoaiNoiDung");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("NgayTao");
 
                     b.Property<string>("EntryId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaChungTu");
 
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("TenTep");
 
                     b.Property<string>("Sha256")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasColumnType("nvarchar(64)")
+                        .HasColumnName("MaBamSha256");
 
                     b.Property<int>("Size")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("KichThuoc");
 
                     b.HasKey("Id");
 
@@ -1483,264 +1759,233 @@ namespace Hpuni.Infrastructure.Migrations
 
                     b.ToTable("TepDinhKemChungTu", "KeToan", t =>
                         {
-                            t.HasCheckConstraint("CK_Attachment_Size", "[Size] BETWEEN 1 AND 2097152");
+                            t.HasCheckConstraint("CK_Attachment_Size", "[KichThuoc] BETWEEN 1 AND 2097152");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Domain.VoucherAttachmentData", b =>
                 {
                     b.Property<string>("AttachmentId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaTepDinhKem");
 
                     b.Property<byte[]>("Content")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("varbinary(max)")
+                        .HasColumnName("NoiDung");
 
                     b.HasKey("AttachmentId");
 
                     b.ToTable("NoiDungTepChungTu", "KeToan", t =>
                         {
-                            t.HasCheckConstraint("CK_AttachmentData_Size", "DATALENGTH([Content]) BETWEEN 1 AND 2097152");
+                            t.HasCheckConstraint("CK_AttachmentData_Size", "DATALENGTH([NoiDung]) BETWEEN 1 AND 2097152");
                         });
                 });
 
             modelBuilder.Entity("Hpuni.Infrastructure.ApplicationRole", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaVaiTro");
 
                     b.Property<bool>("BuiltIn")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("bit")
+                        .HasColumnName("MacDinhHeThong");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("TenVaiTro")
+                        .UseCollation("Latin1_General_100_CI_AS");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.Property<string>("Scope")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("nvarchar(10)")
+                        .HasColumnName("PhamVi");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NormalizedName")
+                    b.HasIndex("Name")
                         .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
+                        .HasFilter("[TenVaiTro] IS NOT NULL");
 
                     b.ToTable("VaiTro", "QuanTriVien");
+
+                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
                 });
 
             modelBuilder.Entity("Hpuni.Infrastructure.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiDung");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLanDangNhapSai");
 
                     b.Property<bool>("Active")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("HoatDong");
 
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateOnly?>("DateOfBirth")
+                        .HasColumnType("date")
+                        .HasColumnName("NgayThangNamSinh");
 
                     b.Property<string>("DepartmentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaDonVi");
+
+                    b.Property<string>("DepartmentName")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("DonVi")
+                        .HasComputedColumnSql("[QuanTriVien].[TenDonViNguoiDung]([MaDonVi])", false);
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("TenNguoiDung");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("DiaChiEmail")
+                        .UseCollation("Latin1_General_100_CI_AS");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("ChoPhepKhoaTaiKhoan");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("KhoaDen");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("MatKhau");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)")
+                        .HasColumnName("SoDienThoai");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnName("PhienBanDong");
 
                     b.Property<string>("Scope")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("nvarchar(10)")
+                        .HasColumnName("PhamVi");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("DauBaoMat");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("TenDangNhap")
+                        .UseCollation("Latin1_General_100_CI_AS");
 
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
 
-                    b.HasIndex("NormalizedEmail")
+                    b.HasIndex("Email")
                         .IsUnique()
-                        .HasDatabaseName("EmailIndex")
-                        .HasFilter("[NormalizedEmail] IS NOT NULL");
+                        .HasFilter("[DiaChiEmail] IS NOT NULL");
 
-                    b.HasIndex("NormalizedUserName")
+                    b.HasIndex("UserName")
                         .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasFilter("[TenDangNhap] IS NOT NULL");
 
                     b.ToTable("NguoiDung", "QuanTriVien");
+
+                    b.SplitToTable("BaoMatNguoiDung", "QuanTriVien", t =>
+                        {
+                            t.Property("Id");
+
+                            t.Property("AccessFailedCount");
+
+                            t.Property("Active");
+
+                            t.Property("LockoutEnabled");
+
+                            t.Property("LockoutEnd");
+
+                            t.Property("RowVersion");
+
+                            t.Property("Scope");
+
+                            t.Property("SecurityStamp");
+                        });
+
+                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Hpuni.Infrastructure.PermissionAssignment", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("UserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiDung");
 
                     b.Property<string>("RoleId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaVaiTro");
+
+                    b.Property<string>("Permission")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Quyen");
+
+                    b.Property<string>("RoleName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("TenVaiTro")
+                        .UseCollation("Latin1_General_100_CI_AS");
 
-                    b.HasKey("Id");
+                    b.HasKey("UserId", "RoleId", "Permission");
 
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("ThuocTinhVaiTro", "QuanTriVien");
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ThuocTinhNguoiDung", "QuanTriVien");
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
-                {
-                    b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("LoginProvider", "ProviderKey");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("DangNhapNgoai", "QuanTriVien");
+                    b.ToTable("PhanQuyen", "QuanTriVien");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaNguoiDung");
 
                     b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("MaVaiTro");
 
                     b.HasKey("UserId", "RoleId");
 
                     b.HasIndex("RoleId");
 
                     b.ToTable("VaiTroNguoiDung", "QuanTriVien");
-                });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("UserId", "LoginProvider", "Name");
-
-                    b.ToTable("MaXacThucNguoiDung", "QuanTriVien");
+                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
                 });
 
             modelBuilder.Entity("Hpuni.Domain.AssetDisposal", b =>
@@ -1778,6 +2023,15 @@ namespace Hpuni.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Hpuni.Domain.AuditEvent", b =>
+                {
+                    b.HasOne("Hpuni.Domain.AuditEvent", null)
+                        .WithOne()
+                        .HasForeignKey("Hpuni.Domain.AuditEvent", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Hpuni.Domain.BudgetAdjustment", b =>
                 {
                     b.HasOne("Hpuni.Infrastructure.ApplicationUser", null)
@@ -1800,15 +2054,9 @@ namespace Hpuni.Infrastructure.Migrations
 
             modelBuilder.Entity("Hpuni.Domain.BudgetAllocation", b =>
                 {
-                    b.HasOne("Hpuni.Domain.Department", null)
-                        .WithMany()
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Hpuni.Domain.BudgetProposal", null)
-                        .WithMany()
-                        .HasForeignKey("ProposalId")
+                        .WithOne()
+                        .HasForeignKey("Hpuni.Domain.BudgetAllocation", "ProposalId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -1901,16 +2149,21 @@ namespace Hpuni.Infrastructure.Migrations
 
             modelBuilder.Entity("Hpuni.Domain.FinanceEntry", b =>
                 {
-                    b.HasOne("Hpuni.Infrastructure.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("ActorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Hpuni.Domain.Department", null)
                         .WithMany()
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hpuni.Domain.BudgetProposal", null)
+                        .WithMany()
+                        .HasForeignKey("FundingProposalId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Hpuni.Domain.FinanceEntry", null)
+                        .WithOne()
+                        .HasForeignKey("Hpuni.Domain.FinanceEntry", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Hpuni.Domain.PaymentRequest", null)
@@ -1994,6 +2247,12 @@ namespace Hpuni.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hpuni.Domain.LoginSession", null)
+                        .WithOne()
+                        .HasForeignKey("Hpuni.Domain.LoginSession", "UserId", "CreatedAt")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -2161,31 +2420,10 @@ namespace Hpuni.Infrastructure.Migrations
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-                });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
-                {
-                    b.HasOne("Hpuni.Infrastructure.ApplicationRole", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
-                {
                     b.HasOne("Hpuni.Infrastructure.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
-                {
-                    b.HasOne("Hpuni.Infrastructure.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                        .WithOne()
+                        .HasForeignKey("Hpuni.Infrastructure.ApplicationUser", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -2198,15 +2436,6 @@ namespace Hpuni.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Hpuni.Infrastructure.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
-                {
                     b.HasOne("Hpuni.Infrastructure.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")

@@ -29,3 +29,13 @@ export function freeIntervals(reservations, open = ROOM_OPEN, close = ROOM_CLOSE
 }
 export const fitsInterval = (intervals,start,end) =>
   minutes(start)<minutes(end) && intervals.some(i=>minutes(start)>=minutes(i.start)&&minutes(end)<=minutes(i.end));
+
+// Chỉ gợi ý giờ tương lai theo múi giờ Việt Nam; chừa ít nhất 5 phút nhập phiếu.
+export function futureIntervals(intervals,date,now=new Date()) {
+  const vn=new Date(now.getTime()+7*3600000),today=vn.toISOString().slice(0,10);
+  if(date<today)return [];
+  if(date>today)return intervals;
+  const earliest=Math.ceil((vn.getUTCHours()*60+vn.getUTCMinutes()+5)/5)*5;
+  return intervals.map(i=>({start:timeAt(Math.max(minutes(i.start),earliest)),end:i.end}))
+    .filter(i=>minutes(i.start)<minutes(i.end));
+}

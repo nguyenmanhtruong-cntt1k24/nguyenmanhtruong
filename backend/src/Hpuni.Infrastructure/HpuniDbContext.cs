@@ -8,6 +8,7 @@ namespace Hpuni.Infrastructure;
 public class HpuniDbContext(DbContextOptions<HpuniDbContext> options)
     : IdentityDbContext<ApplicationUser, ApplicationRole, string>(options)
 {
+    public DbSet<PermissionAssignment> PermissionAssignments => Set<PermissionAssignment>();
     public DbSet<FiscalPeriod> FiscalPeriods => Set<FiscalPeriod>();
     public DbSet<FixedAssetProfile> FixedAssetProfiles => Set<FixedAssetProfile>();
     public DbSet<AssetDisposal> AssetDisposals => Set<AssetDisposal>();
@@ -40,9 +41,20 @@ public class HpuniDbContext(DbContextOptions<HpuniDbContext> options)
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
     public DbSet<EquipmentUseLog> EquipmentUseLogs => Set<EquipmentUseLog>();
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        optionsBuilder.ReplaceService<Microsoft.EntityFrameworkCore.Migrations.IHistoryRepository, VietnameseHistoryRepository>();
+    }
+
     protected override void OnModelCreating(ModelBuilder b)
     {
         base.OnModelCreating(b);
+        // These optional Identity features have no route, provider or UI in this application.
+        b.Ignore<IdentityUserClaim<string>>();
+        b.Ignore<IdentityRoleClaim<string>>();
+        b.Ignore<IdentityUserLogin<string>>();
+        b.Ignore<IdentityUserToken<string>>();
         b.ConfigureFinance();
         b.ConfigureFinanceControls();
         b.ConfigureNotifications();
@@ -52,12 +64,12 @@ public class HpuniDbContext(DbContextOptions<HpuniDbContext> options)
             e.HasIndex(x=>x.EntryId);
             e.HasOne<FinanceEntry>().WithMany().HasForeignKey(x=>x.EntryId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne<ApplicationUser>().WithMany().HasForeignKey(x=>x.ActorId).OnDelete(DeleteBehavior.Restrict);
-            e.ToTable(t=>t.HasCheckConstraint("CK_Attachment_Size","[Size] BETWEEN 1 AND 2097152"));
+            e.ToTable(t=>t.HasCheckConstraint("CK_Attachment_Size","[KichThuoc] BETWEEN 1 AND 2097152"));
         });
         b.Entity<VoucherAttachmentData>(e=>{
             e.HasKey(x=>x.AttachmentId);
             e.HasOne<VoucherAttachment>().WithOne().HasForeignKey<VoucherAttachmentData>(x=>x.AttachmentId).OnDelete(DeleteBehavior.Restrict);
-            e.ToTable(t=>t.HasCheckConstraint("CK_AttachmentData_Size","DATALENGTH([Content]) BETWEEN 1 AND 2097152"));
+            e.ToTable(t=>t.HasCheckConstraint("CK_AttachmentData_Size","DATALENGTH([NoiDung]) BETWEEN 1 AND 2097152"));
         });
         b.ConfigureAssetOperations();
         b.ApplyConfiguration(new AssetGroupConfiguration());
@@ -66,14 +78,32 @@ public class HpuniDbContext(DbContextOptions<HpuniDbContext> options)
         b.ApplyConfiguration(new EquipmentMovementConfiguration());
         b.Entity<ApplicationUser>(e =>
         {
+            // DonVi reads the department table; SQL Server forbids it in OUTPUT.
+            e.ToTable(t => t.UseSqlOutputClause(false));
             e.Property(x => x.DisplayName).HasMaxLength(150);
+            e.Property(x => x.DepartmentName).HasMaxLength(150)
+                .HasComputedColumnSql("[QuanTriVien].[TenDonViNguoiDung]([MaDonVi])", stored: false);
             e.Property(x => x.Scope).HasMaxLength(10);
             e.Property(x => x.RowVersion).IsRowVersion();
             e.HasOne<Department>().WithMany().HasForeignKey(x => x.DepartmentId).OnDelete(DeleteBehavior.Restrict);
-            e.HasIndex(x => x.NormalizedEmail).IsUnique().HasFilter("[NormalizedEmail] IS NOT NULL");
+            e.Ignore(x => x.NormalizedUserName);
+            e.Ignore(x => x.NormalizedEmail);
+            e.Ignore(x => x.EmailConfirmed);
+            e.Property(x => x.PhoneNumber).HasMaxLength(25);
+            e.Ignore(x => x.PhoneNumberConfirmed);
+            e.Ignore(x => x.TwoFactorEnabled);
+            e.Ignore(x => x.ConcurrencyStamp); // RowVersion already protects updates.
+            e.Property(x => x.UserName).UseCollation("Latin1_General_100_CI_AS");
+            e.Property(x => x.Email).UseCollation("Latin1_General_100_CI_AS");
+            e.HasIndex(x => x.UserName).IsUnique().HasFilter("[TenDangNhap] IS NOT NULL");
+            e.HasIndex(x => x.Email).IsUnique().HasFilter("[ThuDienTu] IS NOT NULL");
         });
         b.Entity<ApplicationRole>(e =>
         {
+            e.Ignore(x => x.NormalizedName);
+            e.Ignore(x => x.ConcurrencyStamp);
+            e.Property(x => x.Name).UseCollation("Latin1_General_100_CI_AS");
+            e.HasIndex(x => x.Name).IsUnique().HasFilter("[Ten] IS NOT NULL");
             e.Property(x => x.Scope).HasMaxLength(10);
             e.Property(x => x.RowVersion).IsRowVersion();
         });
@@ -82,11 +112,12 @@ public class HpuniDbContext(DbContextOptions<HpuniDbContext> options)
             e.Property(x => x.Id).HasMaxLength(450);
             e.Property(x => x.Code).HasMaxLength(30);
             e.Property(x => x.Name).HasMaxLength(150);
-            e.Property(x => x.NormalizedName).HasMaxLength(150);
+            e.Ignore(x => x.NormalizedName);
+            e.Property(x => x.Name).UseCollation("Latin1_General_100_CI_AS");
             e.Property(x => x.Notes).HasMaxLength(2000);
             e.Property(x => x.RowVersion).IsRowVersion();
             e.HasIndex(x => x.Code).IsUnique();
-            e.HasIndex(x => x.NormalizedName).IsUnique();
+            e.HasIndex(x => x.Name).IsUnique();
         });
         b.Entity<RolePermission>(e =>
         {
@@ -133,7 +164,7 @@ public class HpuniDbContext(DbContextOptions<HpuniDbContext> options)
             e.Property(x => x.RowVersion).IsRowVersion();
             e.HasIndex(x => x.Code).IsUnique();
             e.HasOne<Department>().WithMany().HasForeignKey(x => x.DepartmentId).OnDelete(DeleteBehavior.Restrict);
-            e.ToTable(t => t.HasCheckConstraint("CK_Room_Capacity", "[Capacity] > 0"));
+            e.ToTable(t => t.HasCheckConstraint("CK_Room_Capacity", "[SucChua] > 0"));
         });
         b.Entity<RoomRequest>(e =>
         {
@@ -145,7 +176,7 @@ public class HpuniDbContext(DbContextOptions<HpuniDbContext> options)
             e.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.OwnerId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne<Department>().WithMany().HasForeignKey(x => x.DepartmentId).OnDelete(DeleteBehavior.Restrict);
             e.HasIndex(x => new { x.OwnerId, x.CreatedAt });
-            e.ToTable(t => { t.HasCheckConstraint("CK_Request_Interval", "[Start] < [End]"); t.HasCheckConstraint("CK_Request_Attendees", "[Attendees] > 0"); });
+            e.ToTable(t => { t.HasCheckConstraint("CK_Request_Interval", "[BatDau] < [KetThuc]"); t.HasCheckConstraint("CK_Request_Attendees", "[SoNguoiThamDu] > 0"); });
         });
         b.Entity<RoomReservation>(e =>
         {
@@ -154,9 +185,9 @@ public class HpuniDbContext(DbContextOptions<HpuniDbContext> options)
             e.Property(x => x.RowVersion).IsRowVersion();
             e.HasOne<Room>().WithMany().HasForeignKey(x => x.RoomId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne<RoomRequest>().WithMany().HasForeignKey(x => x.RequestId).OnDelete(DeleteBehavior.Restrict);
-            e.HasIndex(x => x.RequestId).IsUnique().HasFilter("[RequestId] IS NOT NULL");
+            e.HasIndex(x => x.RequestId).IsUnique().HasFilter("[MaPhieuDangKy] IS NOT NULL");
             e.HasIndex(x => new { x.RoomId, x.Active, x.Start, x.End });
-            e.ToTable(t => t.HasCheckConstraint("CK_Reservation_Interval", "[Start] < [End]"));
+            e.ToTable(t => t.HasCheckConstraint("CK_Reservation_Interval", "[BatDau] < [KetThuc]"));
         });
         b.Entity<IdempotencyRecord>(e =>
         {
@@ -175,9 +206,11 @@ public class HpuniDbContext(DbContextOptions<HpuniDbContext> options)
             e.Property(x => x.RowVersion).IsRowVersion();
             e.HasIndex(x => x.RequestId).IsUnique();
             e.HasOne<RoomRequest>().WithMany().HasForeignKey(x => x.RequestId).OnDelete(DeleteBehavior.Restrict);
-            e.ToTable(t => t.HasCheckConstraint("CK_RoomLog_Actual", "([Used] = 0 AND [ActualStart] IS NULL AND [ActualEnd] IS NULL AND [Attendees] IS NULL) OR ([Used] = 1 AND [ActualStart] IS NOT NULL AND [ActualEnd] IS NOT NULL AND [Attendees] IS NOT NULL AND [ActualStart] < [ActualEnd] AND [Attendees] >= 0)"));
+            e.ToTable(t => t.HasCheckConstraint("CK_RoomLog_Actual", "([DaSuDung] = 0 AND [BatDauThucTe] IS NULL AND [KetThucThucTe] IS NULL AND [SoNguoiThamDu] IS NULL) OR ([DaSuDung] = 1 AND [BatDauThucTe] IS NOT NULL AND [KetThucThucTe] IS NOT NULL AND [SoNguoiThamDu] IS NOT NULL AND [BatDauThucTe] < [KetThucThucTe] AND [SoNguoiThamDu] >= 0)"));
         });
         VietnameseTableNames.Apply(b);
         ActorTableSchemas.Apply(b);
+        VietnameseColumnNames.Apply(b);
+        b.ConfigureExactFix();
     }
 }

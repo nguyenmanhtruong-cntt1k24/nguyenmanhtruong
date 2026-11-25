@@ -76,7 +76,7 @@ public class AssetOperationsService(HpuniDbContext db, IAccessService access, Ad
                 await FinanceService.QueueMaintenance(db,m,ct);
             } else throw AppException.Invalid("Thao tác không hợp lệ.");
             m.Note=AdminService.OptionalNote(input.Note);db.Entry(a).Property(x=>x.Total).IsModified=true;
-            admin.Audit(actor,"maintenance."+operation,id,input);await db.SaveChangesAsync(ct);return View(m);
+            admin.Audit(actor,"maintenance."+operation,id,input);await db.SaveChangesAsync(ct);return await FinancialView(m,ct);
         },ct);
     private void Move(string actor,string asset,string kind,int quantity,string? note)=>db.EquipmentMovements.Add(new(){ActorId=actor,AssetGroupId=asset,Kind=kind,Quantity=quantity,Note=AdminService.OptionalNote(note)});
 

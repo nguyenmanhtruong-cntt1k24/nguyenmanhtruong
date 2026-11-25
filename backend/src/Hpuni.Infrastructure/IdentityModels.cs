@@ -5,6 +5,8 @@ namespace Hpuni.Infrastructure;
 
 public class ApplicationUser : IdentityUser
 {
+    public DateOnly? DateOfBirth { get; set; }
+    public string? DepartmentName { get; private set; }
     public string DisplayName { get; set; } = "";
     public string DepartmentId { get; set; } = "";
     public string Scope { get; set; } = Scopes.Self;

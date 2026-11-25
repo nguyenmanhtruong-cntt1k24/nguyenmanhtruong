@@ -46,7 +46,7 @@ public class RoomService(HpuniDbContext db, IAccessService access, AdminService 
         if (id != null)
         {
             var upcoming = db.RoomRequests.Where(x => x.RoomId == id && (x.Status == "pending" || x.Status == "approved") && x.End > DateTimeOffset.UtcNow);
-            if (!input.Active && await db.RoomReservations.AnyAsync(x => x.RoomId == id && x.Active && x.End > DateTimeOffset.UtcNow, ct))
+            if (!input.Active && (await upcoming.AnyAsync(ct) || await db.RoomReservations.AnyAsync(x => x.RoomId == id && x.Active && x.End > DateTimeOffset.UtcNow, ct)))
                 throw AppException.Invalid("Phòng còn lịch hiệu lực; chưa thể ngừng phục vụ.");
             if (await upcoming.AnyAsync(x => x.Attendees > input.Capacity, ct)) throw AppException.Invalid("Sức chứa mới nhỏ hơn sĩ số của lịch hiệu lực.");
         }

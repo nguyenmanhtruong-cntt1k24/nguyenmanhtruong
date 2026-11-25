@@ -27,7 +27,8 @@ public class AdminService(HpuniDbContext db, UserManager<ApplicationUser> users,
         return new(u.Id, u.UserName!, u.Email!, u.DisplayName, u.DepartmentId, u.Active, u.Scope,
             Convert.ToBase64String(u.RowVersion), p.Grants.Select(x => x.RoleId).ToArray(),
             p.DepartmentIds.ToArray(), p.Denied.ToArray(), p.Grants.ToArray(),
-            await db.RoleAccountOverrides.AsNoTracking().Where(x=>x.UserId==u.Id).Select(x=>x.RoleId).ToArrayAsync(ct));
+            await db.RoleAccountOverrides.AsNoTracking().Where(x=>x.UserId==u.Id).Select(x=>x.RoleId).ToArrayAsync(ct),
+            u.DateOfBirth, await db.Departments.Where(x => x.Id == u.DepartmentId).Select(x => x.Name).SingleAsync(ct), u.PhoneNumber);
     }
 
     public async Task<RoleView> View(ApplicationRole r, CancellationToken ct = default) =>
@@ -48,8 +49,9 @@ public class AdminService(HpuniDbContext db, UserManager<ApplicationUser> users,
         await ValidateDepartment(input.DepartmentId, ct);
         await ValidateRoles(input.RoleIds, ct);
         ValidatePassword(input.Password);
+        ValidateDateOfBirth(input.DateOfBirth);
         var u = new ApplicationUser { UserName = input.UserName!.Trim(), Email = Required(input.Email, 256),
-            DisplayName = Required(input.DisplayName, 150), DepartmentId = input.DepartmentId };
+            DisplayName = Required(input.DisplayName, 150), DepartmentId = input.DepartmentId, DateOfBirth = input.DateOfBirth };
         Check(await users.CreateAsync(u, input.Password));
         foreach (var id in input.RoleIds.Distinct())
             db.UserRoles.Add(new() { UserId = u.Id, RoleId = id });
@@ -65,6 +67,8 @@ public class AdminService(HpuniDbContext db, UserManager<ApplicationUser> users,
         {
             await ValidateDepartment(input.DepartmentId, ct);
             await ValidateRoles(input.RoleIds, ct);
+            ValidateDateOfBirth(input.DateOfBirth);
+            u.DateOfBirth = input.DateOfBirth;
             u.Email = Required(input.Email, 256);
             u.DisplayName = Required(input.DisplayName, 150);
             u.DepartmentId = input.DepartmentId;
@@ -148,6 +152,7 @@ public class AdminService(HpuniDbContext db, UserManager<ApplicationUser> users,
         await mutate(u);
         // Force a parent row update for scope/override changes and their concurrency token.
         u.ConcurrencyStamp = Guid.NewGuid().ToString();
+        db.Entry(u).Property(x => x.SecurityStamp).IsModified = true;
         await db.SaveChangesAsync(ct);
         await ProtectAdministrators(actor, protectSelf, ct);
         var after = await View(u, ct);
@@ -256,6 +261,11 @@ public class AdminService(HpuniDbContext db, UserManager<ApplicationUser> users,
         s = s?.Trim();
         if (string.IsNullOrWhiteSpace(s) || s.Length > max) throw AppException.Invalid($"Trường bắt buộc tối đa {max} ký tự.");
         return s;
+    }
+    public static void ValidateDateOfBirth(DateOnly? value)
+    {
+        if (value is { } date && (date < new DateOnly(1900, 1, 1) || date > DateOnly.FromDateTime(DateTime.UtcNow)))
+            throw AppException.Invalid("Ngày sinh phải từ năm 1900 đến ngày hiện tại.");
     }
     public static void ValidatePassword(string? password)
     {

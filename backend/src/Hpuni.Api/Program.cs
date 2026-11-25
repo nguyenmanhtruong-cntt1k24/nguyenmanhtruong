@@ -26,7 +26,8 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(o =>
     o.Password.RequireDigit = true;
     o.Lockout.MaxFailedAccessAttempts = 5;
     o.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
-}).AddEntityFrameworkStores<HpuniDbContext>().AddDefaultTokenProviders();
+}).AddEntityFrameworkStores<HpuniDbContext>()
+    .AddUserStore<FrontendUserStore>().AddRoleStore<FrontendRoleStore>().AddDefaultTokenProviders();
 builder.Services.ConfigureApplicationCookie(o =>
 {
     o.Cookie.Name = "hpuni.auth";
@@ -85,10 +86,25 @@ if (!builder.Environment.IsDevelopment() && !builder.Environment.IsEnvironment("
 
 var app = builder.Build();
 // Database lifecycle commands are explicit; normal startup never resets or migrates existing data.
-if (args.Contains("--migrate") || args.Contains("--bootstrap"))
+if (args.Contains("--migrate") || args.Contains("--bootstrap") || args.Contains("--seed-samples") || args.Contains("--ensure-khtc"))
 {
     await using var scope = app.Services.CreateAsyncScope();
     var db = scope.ServiceProvider.GetRequiredService<HpuniDbContext>();
+    if (args.Contains("--ensure-khtc"))
+    {
+        await using var tx = await db.Database.BeginTransactionAsync();
+        await TransactionLocks.Acquire(db, "identity", default);
+        var roles = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+        if (!await roles.RoleExistsAsync("Cán bộ thẩm định KHTC"))
+        {
+            if (await db.Roles.AnyAsync(x => x.Id == "khtc")) throw new InvalidOperationException("ID khtc đã tồn tại với tên khác.");
+            AdminService.Check(await roles.CreateAsync(new() { Id = "khtc", Name = "Cán bộ thẩm định KHTC", Scope = Hpuni.Domain.Scopes.All, BuiltIn = true }));
+            db.RolePermissions.AddRange(new[] { "budget.read", "budget.appraise", "reports.read" }.Select(p => new Hpuni.Domain.RolePermission { RoleId = "khtc", Permission = p }));
+            await db.SaveChangesAsync();
+        }
+        await tx.CommitAsync();
+        Console.WriteLine("Vai trò KHTC sẵn sàng; không tự gán quyền cho tài khoản hiện có.");
+    }
     if (args.Contains("--migrate"))
     {
         // Upgrade an existing English-named history before EF reads applied migrations.
@@ -107,6 +123,21 @@ if (args.Contains("--migrate") || args.Contains("--bootstrap"))
                         THROW 51001, 'Both history schemas exist; manual review required.', 1;
                     IF SCHEMA_ID(N'QuanTriVien') IS NULL EXEC(N'CREATE SCHEMA QuanTriVien AUTHORIZATION dbo');
                     ALTER SCHEMA QuanTriVien TRANSFER dbo.LichSuCapNhatCauTruc;
+                END
+                IF OBJECT_ID(N'QuanTriVien.LichSuCapNhatCauTruc', N'U') IS NOT NULL
+                BEGIN
+                    IF COL_LENGTH(N'QuanTriVien.LichSuCapNhatCauTruc', N'MigrationId') IS NOT NULL
+                    BEGIN
+                        IF COL_LENGTH(N'QuanTriVien.LichSuCapNhatCauTruc', N'MaCapNhat') IS NOT NULL
+                            THROW 51002, 'Both history ID columns exist; manual review required.', 1;
+                        EXEC sys.sp_rename N'QuanTriVien.LichSuCapNhatCauTruc.MigrationId', N'MaCapNhat', N'COLUMN';
+                    END
+                    IF COL_LENGTH(N'QuanTriVien.LichSuCapNhatCauTruc', N'ProductVersion') IS NOT NULL
+                    BEGIN
+                        IF COL_LENGTH(N'QuanTriVien.LichSuCapNhatCauTruc', N'PhienBanSanPham') IS NOT NULL
+                            THROW 51003, 'Both history version columns exist; manual review required.', 1;
+                        EXEC sys.sp_rename N'QuanTriVien.LichSuCapNhatCauTruc.ProductVersion', N'PhienBanSanPham', N'COLUMN';
+                    END
                 END
                 """);
         await db.Database.MigrateAsync();
@@ -134,6 +165,8 @@ if (args.Contains("--migrate") || args.Contains("--bootstrap"))
             scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>(),
             password ?? throw new InvalidOperationException("Cần Bootstrap:Password; không có mật khẩu mặc định."));
     }
+    if (args.Contains("--seed-samples"))
+        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(await SampleData.Run(db)));
     return;
 }
 if (trustedProxy != null) app.UseForwardedHeaders(trustedProxy);

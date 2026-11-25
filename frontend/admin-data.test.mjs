@@ -54,5 +54,6 @@ ok(()=>assert.throws(()=>act(d,'scope',{id:u.id,scope:'units',units:[],denied:[]
 ok(()=>assert.throws(()=>act(d,'scope',{id:u.id,scope:'all',units:[],denied:['bad']}),/hợp lệ/));
 ok(()=>assert.throws(()=>act(d,'user',payload,0),/thay đổi/));
 ok(()=>assert.equal(d.audit.length,d.revision));
-ok(()=>assert.equal(PERMISSIONS.length,17));
+ok(()=>assert.equal(PERMISSIONS.length,18));
+ok(()=>assert(PERMISSIONS.some(([permission])=>permission==='reports.export')));
 console.log(`PASS ${count} kiểm tra quản trị viên`);

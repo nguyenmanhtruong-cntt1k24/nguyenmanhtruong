@@ -4,12 +4,12 @@ namespace Hpuni.Application;
 
 public record UserView(string Id, string UserName, string Email, string DisplayName, string DepartmentId,
     bool Active, string Scope, string Version, string[] RoleIds, string[] DepartmentIds, string[] Denied,
-    RoleGrant[] Grants, string[]? OverrideRoleIds = null);
+    RoleGrant[] Grants, string[]? OverrideRoleIds = null, DateOnly? DateOfBirth = null, string? DepartmentName = null, string? PhoneNumber = null);
 public record RoleView(string Id, string Name, string Scope, bool BuiltIn, string Version, string[] Permissions);
 public record DepartmentView(string Id, string Code, string Name, string Notes, bool Active, string Version);
 public record CreateUser(string UserName, string Email, string DisplayName, string DepartmentId,
-    string Password, string[] RoleIds);
-public record UpdateUser(string Email, string DisplayName, string DepartmentId, string[] RoleIds, string Version);
+    string Password, string[] RoleIds, DateOnly? DateOfBirth = null);
+public record UpdateUser(string Email, string DisplayName, string DepartmentId, string[] RoleIds, string Version, DateOnly? DateOfBirth = null);
 public record ChangeStatus(bool Active, string Version, string? Reason);
 public record ConfigureScope(string Scope, string[] DepartmentIds, string[] Denied, string Version);
 public record ConfigureOverride(string RoleId, bool Inherit, string Scope, string[] Permissions, string Version);

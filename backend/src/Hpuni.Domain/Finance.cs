@@ -20,11 +20,7 @@ public class BudgetProposal
 
 public class BudgetAllocation
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string ProposalId { get; set; } = "";
-    public string DepartmentId { get; set; } = "";
-    public int Year { get; set; }
-    public string Category { get; set; } = "general";
     public decimal Amount { get; set; }
 }
 
@@ -55,5 +51,6 @@ public class FinanceEntry
     public string Content { get; set; } = "";
     public string ActorId { get; set; } = "";
     public string? PaymentRequestId { get; set; }
+    public string? FundingProposalId { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
